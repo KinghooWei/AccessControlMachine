@@ -1,0 +1,3 @@
+F:/project/AS/Attendance/app/.cxx/cmake/debug/x86/CMakeFiles/Face.dir
+F:/project/AS/Attendance/app/.cxx/cmake/debug/x86/CMakeFiles/edit_cache.dir
+F:/project/AS/Attendance/app/.cxx/cmake/debug/x86/CMakeFiles/rebuild_cache.dir

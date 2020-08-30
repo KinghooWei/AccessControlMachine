@@ -1,0 +1,25 @@
+[
+{
+  "directory": "F:/project/AS/Attendance/app/.cxx/cmake/release/x86",
+  "command": "E:\\PROGRA~1\\Android\\sdk\\NDK-BU~1\\TOOLCH~1\\llvm\\prebuilt\\WINDOW~1\\bin\\CLANG_~1.EXE --target=i686-none-linux-android23 --gcc-toolchain=\"E:/Program Files (x86)/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64\" --sysroot=\"E:/Program Files (x86)/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/sysroot\"  -DFace_EXPORTS -IF:/project/AS/Attendance/app/src/main/cpp/include/ncnn  -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -mstackrealign -fno-addrsig -Wa,--noexecstack -Wformat -Werror=format-security  -fopenmp -O2 -fvisibility=hidden -fvisibility-inlines-hidden -fomit-frame-pointer -fstrict-aliasing -ffunction-sections -fdata-sections   -std=c++11 -frtti -fexceptions -O2 -DNDEBUG  -fPIC   -o CMakeFiles\\Face.dir\\detect.cpp.o -c F:\\project\\AS\\Attendance\\app\\src\\main\\cpp\\detect.cpp",
+  "file": "F:\\project\\AS\\Attendance\\app\\src\\main\\cpp\\detect.cpp"
+},
+
+{
+  "directory": "F:/project/AS/Attendance/app/.cxx/cmake/release/x86",
+  "command": "E:\\PROGRA~1\\Android\\sdk\\NDK-BU~1\\TOOLCH~1\\llvm\\prebuilt\\WINDOW~1\\bin\\CLANG_~1.EXE --target=i686-none-linux-android23 --gcc-toolchain=\"E:/Program Files (x86)/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64\" --sysroot=\"E:/Program Files (x86)/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/sysroot\"  -DFace_EXPORTS -IF:/project/AS/Attendance/app/src/main/cpp/include/ncnn  -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -mstackrealign -fno-addrsig -Wa,--noexecstack -Wformat -Werror=format-security  -fopenmp -O2 -fvisibility=hidden -fvisibility-inlines-hidden -fomit-frame-pointer -fstrict-aliasing -ffunction-sections -fdata-sections   -std=c++11 -frtti -fexceptions -O2 -DNDEBUG  -fPIC   -o CMakeFiles\\Face.dir\\face_jni.cpp.o -c F:\\project\\AS\\Attendance\\app\\src\\main\\cpp\\face_jni.cpp",
+  "file": "F:\\project\\AS\\Attendance\\app\\src\\main\\cpp\\face_jni.cpp"
+},
+
+{
+  "directory": "F:/project/AS/Attendance/app/.cxx/cmake/release/x86",
+  "command": "E:\\PROGRA~1\\Android\\sdk\\NDK-BU~1\\TOOLCH~1\\llvm\\prebuilt\\WINDOW~1\\bin\\CLANG_~1.EXE --target=i686-none-linux-android23 --gcc-toolchain=\"E:/Program Files (x86)/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64\" --sysroot=\"E:/Program Files (x86)/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/sysroot\"  -DFace_EXPORTS -IF:/project/AS/Attendance/app/src/main/cpp/include/ncnn  -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -mstackrealign -fno-addrsig -Wa,--noexecstack -Wformat -Werror=format-security  -fopenmp -O2 -fvisibility=hidden -fvisibility-inlines-hidden -fomit-frame-pointer -fstrict-aliasing -ffunction-sections -fdata-sections   -std=c++11 -frtti -fexceptions -O2 -DNDEBUG  -fPIC   -o CMakeFiles\\Face.dir\\native-lib.cpp.o -c F:\\project\\AS\\Attendance\\app\\src\\main\\cpp\\native-lib.cpp",
+  "file": "F:\\project\\AS\\Attendance\\app\\src\\main\\cpp\\native-lib.cpp"
+},
+
+{
+  "directory": "F:/project/AS/Attendance/app/.cxx/cmake/release/x86",
+  "command": "E:\\PROGRA~1\\Android\\sdk\\NDK-BU~1\\TOOLCH~1\\llvm\\prebuilt\\WINDOW~1\\bin\\CLANG_~1.EXE --target=i686-none-linux-android23 --gcc-toolchain=\"E:/Program Files (x86)/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64\" --sysroot=\"E:/Program Files (x86)/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/sysroot\"  -DFace_EXPORTS -IF:/project/AS/Attendance/app/src/main/cpp/include/ncnn  -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -mstackrealign -fno-addrsig -Wa,--noexecstack -Wformat -Werror=format-security  -fopenmp -O2 -fvisibility=hidden -fvisibility-inlines-hidden -fomit-frame-pointer -fstrict-aliasing -ffunction-sections -fdata-sections   -std=c++11 -frtti -fexceptions -O2 -DNDEBUG  -fPIC   -o CMakeFiles\\Face.dir\\recognize.cpp.o -c F:\\project\\AS\\Attendance\\app\\src\\main\\cpp\\recognize.cpp",
+  "file": "F:\\project\\AS\\Attendance\\app\\src\\main\\cpp\\recognize.cpp"
+}
+]

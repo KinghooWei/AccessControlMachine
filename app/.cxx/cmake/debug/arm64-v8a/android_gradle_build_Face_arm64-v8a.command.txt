@@ -1,0 +1,9 @@
+Executable : E:\Program
+arguments : 
+Files
+(x86)\Android\sdk\cmake\3.10.2.4988404\bin\ninja.exe
+-C
+F:\project\AS\Attendance\app\.cxx\cmake\debug\arm64-v8a
+Face
+jvmArgs : 
+
