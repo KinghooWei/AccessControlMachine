@@ -92,7 +92,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
     }
 
     private void UIInit() {
-        cvPreview = findViewById(R.id.cv_preview);
+        cvPreview = (Camera2View) findViewById(R.id.cv_preview);
         ivFace = findViewById(R.id.iv_face);
         tvResult = findViewById(R.id.tv_result);
         etPwd = findViewById(R.id.et_pwd);
