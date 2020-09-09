@@ -1,7 +1,7 @@
 [
   {
     "level": "INFO",
-    "message": "Start JSON generation. Platform version: 23 min SDK version: armeabi-v7a",
+    "message": "Start JSON generation. Platform version: 24 min SDK version: armeabi-v7a",
     "file": "F:\\project\\AS\\Attendance\\app\\src\\main\\cpp\\CMakeLists.txt",
     "tag": "debug|armeabi-v7a"
   },
@@ -13,7 +13,7 @@
   },
   {
     "level": "INFO",
-    "message": "- CMake found in SDK at \u0027E:\\Program Files (x86)\\Android\\sdk\\cmake\\3.10.2.4988404\u0027 had version \u00273.10.2\u0027",
+    "message": "- CMake found in SDK at \u0027E:\\sdk\\cmake\\3.10.2.4988404\u0027 had version \u00273.10.2\u0027",
     "file": "F:\\project\\AS\\Attendance\\app\\src\\main\\cpp\\CMakeLists.txt",
     "tag": "debug|armeabi-v7a"
   },

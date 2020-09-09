@@ -19,7 +19,7 @@ import java.util.Date;
 import java.util.UUID;
 
 public class HttpUtils {
-    private static String jsonApiUrl = "http://192.168.1.112:8080/door/api"; //通用的json api接口
+    private static String jsonApiUrl = "http://192.168.1.115:8080/door/api"; //通用的json api接口
     private static String multipartApiUrl = "http://192.168.43.178:8080/door/multipartApi/"; //通用的multipart api接口
     private static URL url;
     private static String TAG = "HttpUtils";

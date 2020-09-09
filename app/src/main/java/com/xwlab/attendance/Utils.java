@@ -11,6 +11,8 @@ import java.nio.ByteBuffer;
 
 public class Utils {
     private final static String TAG = "Utils";
-    //get pixels
 
+    public static String t1f(float temp) {
+        return String.format(java.util.Locale.ENGLISH, "%.1f", temp);
+    }
 }

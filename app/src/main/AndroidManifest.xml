@@ -22,12 +22,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:usesCleartextTraffic="true"
-        android:requestLegacyExternalStorage="true"> <!--        关闭scope storage-->
-        <activity android:name=".ProvinceActivity"></activity>
+        android:usesCleartextTraffic="true">
+
+        <activity android:name=".ProvinceActivity" />
         <activity
             android:name=".Main3Activity"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
         <activity android:name=".InitActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

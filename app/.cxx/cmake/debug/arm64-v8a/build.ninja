@@ -73,12 +73,12 @@ build CMakeFiles/Face.dir/recognize.cpp.o: CXX_COMPILER__Face F$:/project/AS/Att
 #############################################
 # Link the shared library F:\project\AS\Attendance\app\build\intermediates\cmake\debug\obj\arm64-v8a\libFace.so
 
-ident398 = E:/Program Files (x86)/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/lib/aarch64-linux-android/23/liblog.so
+ident398 = E:/Program Files (x86)/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/lib/aarch64-linux-android/24/liblog.so
 build F$:/project/AS/Attendance/app/build/intermediates/cmake/debug/obj/arm64-v8a/libFace.so: CXX_SHARED_LIBRARY_LINKER__Face CMakeFiles/Face.dir/detect.cpp.o CMakeFiles/Face.dir/face_jni.cpp.o CMakeFiles/Face.dir/native-lib.cpp.o CMakeFiles/Face.dir/recognize.cpp.o | F$:/project/AS/Attendance/app/src/main/cpp/../../../libs/arm64-v8a/libncnn.a $ident398
   LANGUAGE_COMPILE_FLAGS = -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -fno-addrsig -Wa,--noexecstack -Wformat -Werror=format-security  -fopenmp -O2 -fvisibility=hidden -fvisibility-inlines-hidden -fomit-frame-pointer -fstrict-aliasing -ffunction-sections -fdata-sections   -std=c++11 -frtti -fexceptions -O0 -fno-limit-debug-info
   LINK_FLAGS = -Wl,--exclude-libs,libgcc.a -Wl,--exclude-libs,libatomic.a -static-libstdc++ -Wl,--build-id -Wl,--warn-shared-textrel -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments -Wl,-z,noexecstack
   LINK_LIBRARIES = F:/project/AS/Attendance/app/src/main/cpp/../../../libs/arm64-v8a/libncnn.a -landroid -llog -latomic -lm
-  LINK_PATH = -LE:/PROGRA~1/Android/sdk/NDK-BU~1/TOOLCH~1/llvm/prebuilt/WINDOW~1/sysroot/usr/lib/AARCH6~1/23
+  LINK_PATH = -LE:/PROGRA~1/Android/sdk/NDK-BU~1/TOOLCH~1/llvm/prebuilt/WINDOW~1/sysroot/usr/lib/AARCH6~1/24
   OBJECT_DIR = CMakeFiles\Face.dir
   POST_BUILD = cd .
   PRE_LINK = cd .

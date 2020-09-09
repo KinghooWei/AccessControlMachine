@@ -13,7 +13,10 @@
       "artifactName": "Face",
       "buildCommand": "E:\\Program Files (x86)\\Android\\sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe -C \"F:\\project\\AS\\Attendance\\app\\.cxx\\cmake\\debug\\arm64-v8a\" Face",
       "abi": "arm64-v8a",
-      "output": "F:\\project\\AS\\Attendance\\app\\build\\intermediates\\cmake\\debug\\obj\\arm64-v8a\\libFace.so"
+      "output": "F:\\project\\AS\\Attendance\\app\\build\\intermediates\\cmake\\debug\\obj\\arm64-v8a\\libFace.so",
+      "runtimeFiles": [
+        "F:\\project\\AS\\Attendance\\app\\libs\\arm64-v8a\\libncnn.a"
+      ]
     }
   }
 }

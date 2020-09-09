@@ -17,6 +17,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.Arrays;
 import java.util.Scanner;
 import java.util.Vector;
 
@@ -54,8 +55,9 @@ public class FaceDatabase {
                 String name = cursor.getString(cursor.getColumnIndex("name"));
                 String feature = cursor.getString(cursor.getColumnIndex("feature"));
                 String password = cursor.getString(cursor.getColumnIndex("password"));
-                Logger.i(TAG, "从数据库读取信息 phoneNum: " + phoneNum + " name: " + name);
-                insertRAM(name, feature, phoneNum, password);
+                Logger.i(TAG, "从SQL读取信息 phoneNum: " + phoneNum + " name: " + name);
+                Logger.i(TAG, feature);
+                insertRAM(name, phoneNum, password, feature);
             } while (cursor.moveToNext());
         }
         cursor.close();
@@ -133,6 +135,8 @@ public class FaceDatabase {
      * @return 返回匹配的人名，比对不成功则返回""
      */
     public Object[] featureCmp(String fstr) {
+//        Logger.i(TAG,fstr);
+        Logger.i(TAG, Arrays.toString(features.get(0)));
         Object[] objects;
         String fs[] = fstr.split(",");
         if (fs.length != 128) {
@@ -164,10 +168,10 @@ public class FaceDatabase {
             objects = new Object[]{names.get(index), phoneNums.get(index)};
             return objects;
         } else if (mSim < 0.3) {
-            objects = new Object[]{"unknown", "-1"};
+            objects = new Object[]{"unknown", null};
             return objects;
         } else {
-            objects = new Object[]{"", "-1"};
+            objects = new Object[]{"", null};
             return objects;
         }
     }
@@ -373,6 +377,7 @@ public class FaceDatabase {
 
     //特征描述字符串转double数组
     private double[] featureStringToArray(String feature) {
+
         if (feature.isEmpty() || feature.equals("null")) {
             return null;
         } else {
@@ -571,8 +576,8 @@ public class FaceDatabase {
                             updateCount++;
                         } else {        //增添信息
                             // 增加新的personId数据
-                            insertSQL(name,phoneNum,password,feature);
-                            insertRAM(name,phoneNum,password,feature);
+                            insertSQL(name, phoneNum, password, feature);
+                            insertRAM(name, phoneNum, password, feature);
                             addCount++;
                         }
                     }

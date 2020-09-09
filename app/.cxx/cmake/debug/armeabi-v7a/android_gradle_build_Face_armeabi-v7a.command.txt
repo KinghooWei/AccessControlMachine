@@ -1,7 +1,5 @@
-Executable : E:\Program
+Executable : E:\sdk\cmake\3.10.2.4988404\bin\ninja.exe
 arguments : 
-Files
-(x86)\Android\sdk\cmake\3.10.2.4988404\bin\ninja.exe
 -C
 F:\project\AS\Attendance\app\.cxx\cmake\debug\armeabi-v7a
 Face

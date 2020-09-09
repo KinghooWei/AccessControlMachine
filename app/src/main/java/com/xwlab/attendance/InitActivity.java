@@ -6,10 +6,14 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AlertDialog;
+//import android.support.annotation.NonNull;
+//import android.support.annotation.Nullable;
+//import android.support.v7.app.AlertDialog;
+//import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
@@ -46,8 +50,15 @@ public class InitActivity extends AppCompatActivity implements AdapterView.OnIte
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_init);
+//        CameraManager cm = (CameraManager) getSystemService(CAMERA_SERVICE);
+//        try {
+//            String[] cl = cm.getCameraIdList();
+//            Logger.i("test",cl[0]);
+//        } catch (CameraAccessException e) {
+//            e.printStackTrace();
+//        }
         shareUtil = new SharedPreferencesUtil(this);
-        hasAddress = shareUtil.loadBoolean("hasAddress",false);
+        hasAddress = shareUtil.loadBoolean("hasAddress", false);
         cityArray = new String[]{"请选择"};
         communityArray = new String[]{"请选择"};
         gateArray = new String[]{"请选择"};
@@ -61,14 +72,14 @@ public class InitActivity extends AppCompatActivity implements AdapterView.OnIte
         initCity();
         initCommunity();
         initGate();
-        btnOK = findViewById(R.id.btn_ok);
+        btnOK = (Button) findViewById(R.id.btn_ok);
         btnOK.setOnClickListener(this);
     }
 
     private void initProvince() {
         ArrayAdapter<String> provinceAdapter = new ArrayAdapter<>(this, R.layout.item_select, provinceArray);
         provinceAdapter.setDropDownViewResource(R.layout.item_dropdown);
-        spProvince = findViewById(R.id.sp_province);
+        spProvince = (Spinner) findViewById(R.id.sp_province);
         spProvince.setAdapter(provinceAdapter);
         spProvince.setSelection(0);
         spProvince.setOnItemSelectedListener(this);
@@ -77,7 +88,7 @@ public class InitActivity extends AppCompatActivity implements AdapterView.OnIte
     private void initCity() {
         ArrayAdapter<String> cityAdapter = new ArrayAdapter<>(this, R.layout.item_select, cityArray);
         cityAdapter.setDropDownViewResource(R.layout.item_dropdown);
-        spCity = findViewById(R.id.sp_city);
+        spCity = (Spinner) findViewById(R.id.sp_city);
         spCity.setAdapter(cityAdapter);
         spCity.setSelection(0);
         spCity.setOnItemSelectedListener(this);
@@ -86,7 +97,7 @@ public class InitActivity extends AppCompatActivity implements AdapterView.OnIte
     private void initCommunity() {
         ArrayAdapter<String> communityAdapter = new ArrayAdapter<>(this, R.layout.item_select, communityArray);
         communityAdapter.setDropDownViewResource(R.layout.item_dropdown);
-        spCommunity = findViewById(R.id.sp_community);
+        spCommunity = (Spinner) findViewById(R.id.sp_community);
         spCommunity.setAdapter(communityAdapter);
         spCommunity.setSelection(0);
         spCommunity.setOnItemSelectedListener(this);
@@ -95,7 +106,7 @@ public class InitActivity extends AppCompatActivity implements AdapterView.OnIte
     private void initGate() {
         ArrayAdapter<String> gateAdapter = new ArrayAdapter<>(this, R.layout.item_select, gateArray);
         gateAdapter.setDropDownViewResource(R.layout.item_dropdown);
-        spGate = findViewById(R.id.sp_gate);
+        spGate = (Spinner) findViewById(R.id.sp_gate);
         spGate.setAdapter(gateAdapter);
         spGate.setSelection(0);
         spGate.setOnItemSelectedListener(this);
@@ -331,7 +342,7 @@ public class InitActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     public void onClick(View v) {
         if (!TextUtils.isEmpty(gate)) {
-            Logger.i(TAG, "已选择"+community+gate);
+            Logger.i(TAG, "已选择" + community + gate);
             shareUtil.saveBoolean("hasAddress", true);
             shareUtil.saveString("community", community);
             shareUtil.saveString("gate", gate);

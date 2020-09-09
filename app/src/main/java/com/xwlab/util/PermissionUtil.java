@@ -7,10 +7,14 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
+//import android.support.v4.app.ActivityCompat;
+//import android.support.v4.content.ContextCompat;
+
 import android.util.Log;
 import android.widget.Toast;
+
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.xwlab.attendance.Logger;
 
@@ -59,23 +63,23 @@ public class PermissionUtil {
     }
 
     // 检查是否允许修改系统设置
-    public static boolean checkWriteSettings(Activity act, int requestCode) {
-        Log.d(TAG, "checkWriteSettings:");
-        boolean result = true;
-        // 只对Android6.0及Android7.0系统进行校验
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-                && Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            // 检查当前App是否允许修改系统设置
-            if(!Settings.System.canWrite(act)){
-                Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS,
-                        Uri.parse("package:" + act.getPackageName()));
-                act.startActivityForResult(intent, requestCode);
-                Toast.makeText(act, "需要允许设置权限才能调节亮度噢", Toast.LENGTH_SHORT).show();
-                result = false;
-            }
-        }
-        return result;
-    }
+//    public static boolean checkWriteSettings(Activity act, int requestCode) {
+//        Log.d(TAG, "checkWriteSettings:");
+//        boolean result = true;
+//        // 只对Android6.0及Android7.0系统进行校验
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+//                && Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+//            // 检查当前App是否允许修改系统设置
+//            if(!Settings.System.canWrite(act)){
+//                Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS,
+//                        Uri.parse("package:" + act.getPackageName()));
+//                act.startActivityForResult(intent, requestCode);
+//                Toast.makeText(act, "需要允许设置权限才能调节亮度噢", Toast.LENGTH_SHORT).show();
+//                result = false;
+//            }
+//        }
+//        return result;
+//    }
 
     public static void goActivity(Context ctx, Class<?> cls) {
         Intent intent = new Intent(ctx, cls);

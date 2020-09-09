@@ -1,5 +1,5 @@
 {
-  "ndkFolder": "E:\\Program Files (x86)\\Android\\sdk\\ndk-bundle",
+  "ndkFolder": "E:\\ndk\\android-ndk-r15c",
   "messages": [
     {
       "level": "INFO",
@@ -7,7 +7,7 @@
     },
     {
       "level": "INFO",
-      "message": "ndk.dir in local.properties is E:\\Program Files (x86)\\Android\\sdk\\ndk-bundle"
+      "message": "ndk.dir in local.properties is E:\\ndk\\android-ndk-r15c"
     },
     {
       "level": "INFO",
@@ -19,7 +19,7 @@
     },
     {
       "level": "INFO",
-      "message": "Considering E:\\Program Files (x86)\\Android\\sdk\\ndk-bundle by ndk.dir"
+      "message": "Considering E:\\ndk\\android-ndk-r15c by ndk.dir"
     },
     {
       "level": "INFO",
@@ -31,7 +31,7 @@
     },
     {
       "level": "INFO",
-      "message": "Found requested ndk.dir (E:\\Program Files (x86)\\Android\\sdk\\ndk-bundle) which has version 20.0.5594570"
+      "message": "Found requested ndk.dir (E:\\ndk\\android-ndk-r15c) which has version 15.2.4203891"
     }
   ]
 }

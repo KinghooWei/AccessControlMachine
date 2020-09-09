@@ -1,6 +1,0 @@
-# ninja log v5
-83	926	619979696	CMakeFiles/Face.dir/native-lib.cpp.o	c5a972822ca8f386
-267	1334	619979696	CMakeFiles/Face.dir/recognize.cpp.o	2a533e3ac7d6ff5
-179	1475	619979696	CMakeFiles/Face.dir/face_jni.cpp.o	48bf53cd147bbb6c
-1	1820	619979697	CMakeFiles/Face.dir/detect.cpp.o	d0e72c14c8eac0bf
-1821	2868	619979698	F:/project/AS/Attendance/app/build/intermediates/cmake/debug/obj/arm64-v8a/libFace.so	6055b1118c108d84
