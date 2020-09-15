@@ -1,6 +1,6 @@
 # ninja log v5
-505	1330	621339297	CMakeFiles/Face.dir/native-lib.cpp.o	87a3abc822bac5c2
-615	1732	621339298	CMakeFiles/Face.dir/recognize.cpp.o	b96ca0966b8d804a
-431	1903	621339298	CMakeFiles/Face.dir/face_jni.cpp.o	405f897b118e98bb
-16	2258	621339298	CMakeFiles/Face.dir/detect.cpp.o	b1e00e959535388e
-2258	2949	621339299	F:/project/AS/Attendance/app/build/intermediates/cmake/debug/obj/armeabi-v7a/libFace.so	31a954e7cfabaf2e
+82	763	621447154	CMakeFiles/Face.dir/native-lib.cpp.o	57f6febb14999b30
+131	1198	621447154	CMakeFiles/Face.dir/recognize.cpp.o	dc06dc64b1b5c9f8
+39	1329	621447155	CMakeFiles/Face.dir/face_jni.cpp.o	a742c8b5f568ed2a
+1	1721	621447155	CMakeFiles/Face.dir/detect.cpp.o	bd59f3cd1ff1ad07
+1721	2162	621447155	F:/project/AS/Attendance/app/build/intermediates/cmake/debug/obj/armeabi-v7a/libFace.so	7b1e4e91bce49335

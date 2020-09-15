@@ -18,7 +18,9 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -31,15 +33,18 @@ import com.google.zxing.RGBLuminanceSource;
 import com.google.zxing.Result;
 import com.google.zxing.common.GlobalHistogramBinarizer;
 import com.google.zxing.qrcode.QRCodeReader;
+import com.lztek.tools.irmeter.MLX906xx;
 import com.xwlab.util.CodeHints;
 import com.xwlab.util.Constant;
 import com.xwlab.widget.Camera2View;
+import com.xwlab.widget.MLXGridView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Date;
 
 import static com.xwlab.attendance.HttpUtils.sendJsonPost;
@@ -55,16 +60,24 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
     private ImageView ivFace, ivBackground;
     private TextView tvResult, etPwd;
     private String password = "", showText = "";
-    private int encryption = 0;     //1表示开启加密模式
+    private boolean encryption = false;     //1表示开启加密模式
     private Bitmap face;
     private Uri ringtoneUri = Uri.parse("android.resource://" + R.raw.beep);
     private Ringtone ringtone;
 
-    private String lastUnknownFeature;
-    private Long lastUnknownTime = 0L;
+//    private String lastUnknownFeature;
+//    private Long lastUnknownTime = 0L;
+//
+//    private boolean haveFace = false;
+//    private String lastName;
 
-    private boolean haveFace = false;
-    private String lastName;
+    protected Handler mHandler;
+
+    protected MLX906xx mMLX90640;
+    protected TextView mTvTemperature;
+    protected MLXGridView mGridView;
+
+//    protected Spinner mSpnRefreshRate;
 
     Button btnEncrypt;
 
@@ -75,12 +88,15 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main3);
-
+        UIInit();
+        //初始化人脸识别模型、更新加载数据库
         mFace.FaceModelInit(sdPath);
         mFaceDatabase = new FaceDatabase(getApplicationContext());
         mFaceDatabase.updateDatabase();
-        UIInit();
-        Glide.with(this).load(R.drawable.access_background).into(ivBackground);
+
+        mHandler = new Handler();
+        mGridView.setModuleType(MLXGridView.MLX90640);
+        mMLX90640 = new MLX906xx();
     }
 
     @Override
@@ -89,6 +105,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         workThreadFlag = true;
         new Thread(new FDThread()).start();
 //        new Thread(new QRCodeScanThread()).start();
+        onBtnAuto();
     }
 
     @Override
@@ -97,13 +114,105 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         workThreadFlag = false;
     }
 
+    private Runnable mAutoRefreshRunnable = null;
+
+    private void onBtnAuto() {
+        if (null == mAutoRefreshRunnable) {
+            if (mlx90640InitializeCheck() < 0) {
+                return;
+            }
+            mAutoRefreshRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    mlx90640Measure();
+                    int interval = 500;
+                    int refreshRate = mMLX90640.getRefreshRate();
+                    if (refreshRate != 0) {
+                        interval = ((1000 * 1000) >> (refreshRate - 1)) / 1000;
+                    } else {
+                        interval = 2000;
+                    }
+                    mHandler.removeCallbacks(this);
+                    mHandler.postDelayed(this, interval < 100 ? 500 : interval);
+                }
+            };
+            mHandler.postDelayed(mAutoRefreshRunnable, 1000);
+        } else {
+            mHandler.removeCallbacks(mAutoRefreshRunnable);
+            mAutoRefreshRunnable = null;
+        }
+    }
+
+    private int[] mRefreshRateValues = new int[]{
+            MLX906xx.MLX90640Refresh1HZ,
+            MLX906xx.MLX90640Refresh2HZ,
+            MLX906xx.MLX90640Refresh4HZ,
+            MLX906xx.MLX90640Refresh8HZ,
+            MLX906xx.MLX90640Refresh16HZ,
+    };
+
+    protected int mlx90640InitializeCheck() {
+
+        int refreshRate = mRefreshRateValues[4];
+
+        if (refreshRate == mMLX90640.getRefreshRate()) {
+            return refreshRate;
+        }
+
+        int ret = mMLX90640.MLX90640_InitProcedure(refreshRate);
+        if (0 != ret) {
+            Toast.makeText(this, "MLX90640初始化失败", Toast.LENGTH_LONG).show();
+            mTvTemperature.setText("MLX90640初始化失败！");
+            return ret;
+        } else {
+            mTvTemperature.setText("MLX90640初始化成功!");
+            return mMLX90640.getRefreshRate();
+        }
+    }
+
+
+    float[] mlx90640ImageP0 = new float[768];
+    float[] mlx90640ImageP1 = new float[768];
+    float[] mlx90640ToP0 = new float[768];
+    float[] mlx90640ToP1 = new float[768];
+
+    float[] mTemperature = new float[768];
+    float[] mImages = new float[768];
+
+    protected void mlx90640Measure() {
+        int ret = mMLX90640.MLX90640_Measure(mlx90640ImageP0, mlx90640ImageP1, mlx90640ToP0, mlx90640ToP1);
+
+        float max = Float.MIN_VALUE;
+        for (int i = 0; i < 768; ++i) {
+            ;
+
+            mTemperature[i] = mlx90640ToP0[i] + mlx90640ToP1[i];
+            mImages[i] = mlx90640ImageP0[i] + mlx90640ImageP1[i];
+            if (max < mTemperature[i]) {
+                max = mTemperature[i];
+            }
+        }
+        System.out.println(Arrays.toString(mTemperature));
+        System.out.println(Arrays.toString(mImages));
+        if (ret == 0) {
+            mTvTemperature.setText("当前温度：" + Utils.t1f(max) + "度");
+            mGridView.setTemperature(mTemperature, mImages);
+        } else {
+            mTvTemperature.setText("MLX90640数据读取错误");
+            Toast.makeText(this, "MLX90640数据读取错误", Toast.LENGTH_LONG).show();
+        }
+    }
+
     private void UIInit() {
-        cvPreview = (Camera2View) findViewById(R.id.cv_preview);
-        ivFace = (ImageView) findViewById(R.id.iv_face);
-        tvResult = (TextView) findViewById(R.id.tv_result);
-        etPwd = (TextView) findViewById(R.id.et_pwd);
-        btnEncrypt = (Button) findViewById(R.id.btn_encrypt);
-        ivBackground = (ImageView) findViewById(R.id.iv_background);
+        mTvTemperature = findViewById(R.id.tv_temperature);
+        mGridView = findViewById(R.id.grid24x32view);
+        cvPreview = findViewById(R.id.cv_preview);
+        ivFace = findViewById(R.id.iv_face);
+        tvResult = findViewById(R.id.tv_result);
+        etPwd = findViewById(R.id.et_pwd);
+        btnEncrypt = findViewById(R.id.btn_encrypt);
+        ivBackground = findViewById(R.id.iv_background);
+        Glide.with(this).load(R.drawable.access_background).into(ivBackground);
 
         findViewById(R.id.button1).setOnClickListener(this);
         findViewById(R.id.button2).setOnClickListener(this);
@@ -127,45 +236,47 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
     @Override
     public void onClick(View view) {
         int resId = view.getId(); // 获得当前按钮的编号
-        String inputText;
-
-        if (resId == R.id.btn_encrypt) {
-
-            if (btnEncrypt.getText() == "开启加密模式") {
-                btnEncrypt.setText("关闭加密模式");
-                encryption = 1;
+        switch (resId) {
+            case R.id.btn_encrypt:
+                if (encryption==false) {
+                    btnEncrypt.setText("关闭加密模式");
+                    encryption = true;
 //                cvPreview.setVisibility(View.INVISIBLE);
-            } else {
-                btnEncrypt.setText("开启加密模式");
-                encryption = 0;
-//                cvPreview.setVisibility(View.VISIBLE);
-            }
-        } else if (resId == R.id.button_cancel) {
-            tvResult.setText("");
-            if (password.length() > 0) {
-                password = password.substring(0, password.length() - 1);
-                showText = showText.substring(0, showText.length() - 1);
-            }
-        } else if (resId == R.id.btn_updateSQL) {
-            mFaceDatabase.updateDatabase();
-        } else {
-            if (password.length() < 6) {
-                inputText = ((TextView) view).getText().toString();
-                password = password + inputText;
-                showText = showText + '·';
-            }
-            if (password.length() == 6) {
-                if (mFaceDatabase.passwordCmp(password)) {
-                    tvResult.setText("验证成功");
                 } else {
-                    tvResult.setText("密码输入错误");
+                    btnEncrypt.setText("开启加密模式");
+                    encryption = false;
+//                cvPreview.setVisibility(View.VISIBLE);
                 }
-                sendMessageDelayed(Constant.CLEAN_TEXT, 2000);
-                showText = "";
-                password = "";
-            } else {
+                break;
+            case R.id.button_cancel:
                 tvResult.setText("");
-            }
+                if (password.length() > 0) {
+                    password = password.substring(0, password.length() - 1);
+                    showText = showText.substring(0, showText.length() - 1);
+                }
+                break;
+            case R.id.btn_updateSQL:
+                mFaceDatabase.updateDatabase();
+                break;
+            default:
+                if (password.length() < 6) {
+                    String inputText = ((TextView) view).getText().toString();
+                    password = password + inputText;
+                    showText = showText + '·';
+                }
+                if (password.length() == 6) {
+                    if (mFaceDatabase.passwordCmp(password)) {
+                        tvResult.setText("验证成功");
+                    } else {
+                        tvResult.setText("密码输入错误");
+                    }
+                    sendMessageDelayed(Constant.CLEAN_TEXT, 2000);
+                    showText = "";
+                    password = "";
+                } else {
+                    tvResult.setText("");
+                }
+                break;
         }
         etPwd.setText(showText);
     }
@@ -198,7 +309,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                     int right = faceInfo[3];
                     int bottom = faceInfo[4];
                     faceRect = Bitmap.createBitmap(image, left, top, right - left, bottom - top);
-                    if (encryption == 1) {
+                    if (encryption == true) {
                         face = encryptBitmap(image);
                     } else {
                         face = image;
@@ -363,63 +474,63 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    private class QRCodeScanThread implements Runnable {
-        private String QRCode, phoneNum, lastPhoneNum;
-        private Long lastTime;
-        private boolean hasQR;
-
-        @Override
-        public void run() {
-            Logger.e(TAG, "start QRThread");
-            while (!Thread.currentThread().isInterrupted()) {
-                if (!workThreadFlag) {
-                    return;
-                }
-                Bitmap image = cvPreview.getBitmap();
-                if (image == null) {
-                    continue;
-                }
-                Result result = decodeQR(image);
-                if (result != null) {
-                    String[] data = result.toString().split("-");
-                    if (data.length == 3 && data[0].equals("blueCity")) {   //是目标二维码
-//                        Logger.e(TAG,result.toString());
-                        Long sysTime = new Date().getTime();
-//                        Logger.i(TAG, sysTime.toString());
-                        if (data[1].equals(lastPhoneNum)) {     //与上一个二维码相同
-                            Long time = sysTime - lastTime;
-//                            Logger.i(TAG, time.toString());
-                            if (time > 2000) {     //间隔大于2秒
-                                phoneNum = data[1];
-                                QRCode = data[2];
-                                if (ringtone != null) {
-                                    // 停止播放铃声
-                                    ringtone.stop();
-                                }
-                                ringtone = RingtoneManager.getRingtone(Main3Activity.this, ringtoneUri);
-                                ringtone.play();
-                                new Thread(new QRCodeHttpThread(phoneNum, QRCode)).start();
-                            }
-                        } else {        //与上一个二维码不同
-                            phoneNum = data[1];
-                            QRCode = data[2];
-                            if (ringtone != null) {
-                                // 停止播放铃声
-                                ringtone.stop();
-                            }
-                            ringtone = RingtoneManager.getRingtone(Main3Activity.this, ringtoneUri);
-                            ringtone.play();
-                            new Thread(new QRCodeHttpThread(phoneNum, QRCode)).start();
-                        }
-                        lastTime = sysTime;
-                        lastPhoneNum = phoneNum;
-                    }
-                } else {
-//                    sendMessage(Constant.CLEAN_TEXT);
-                }
-            }
-        }
-    }
+//    private class QRCodeScanThread implements Runnable {
+//        private String QRCode, phoneNum, lastPhoneNum;
+//        private Long lastTime;
+//        private boolean hasQR;
+//
+//        @Override
+//        public void run() {
+//            Logger.e(TAG, "start QRThread");
+//            while (!Thread.currentThread().isInterrupted()) {
+//                if (!workThreadFlag) {
+//                    return;
+//                }
+//                Bitmap image = cvPreview.getBitmap();
+//                if (image == null) {
+//                    continue;
+//                }
+//                Result result = decodeQR(image);
+//                if (result != null) {
+//                    String[] data = result.toString().split("-");
+//                    if (data.length == 3 && data[0].equals("blueCity")) {   //是目标二维码
+////                        Logger.e(TAG,result.toString());
+//                        Long sysTime = new Date().getTime();
+////                        Logger.i(TAG, sysTime.toString());
+//                        if (data[1].equals(lastPhoneNum)) {     //与上一个二维码相同
+//                            Long time = sysTime - lastTime;
+////                            Logger.i(TAG, time.toString());
+//                            if (time > 2000) {     //间隔大于2秒
+//                                phoneNum = data[1];
+//                                QRCode = data[2];
+//                                if (ringtone != null) {
+//                                    // 停止播放铃声
+//                                    ringtone.stop();
+//                                }
+//                                ringtone = RingtoneManager.getRingtone(Main3Activity.this, ringtoneUri);
+//                                ringtone.play();
+//                                new Thread(new QRCodeHttpThread(phoneNum, QRCode)).start();
+//                            }
+//                        } else {        //与上一个二维码不同
+//                            phoneNum = data[1];
+//                            QRCode = data[2];
+//                            if (ringtone != null) {
+//                                // 停止播放铃声
+//                                ringtone.stop();
+//                            }
+//                            ringtone = RingtoneManager.getRingtone(Main3Activity.this, ringtoneUri);
+//                            ringtone.play();
+//                            new Thread(new QRCodeHttpThread(phoneNum, QRCode)).start();
+//                        }
+//                        lastTime = sysTime;
+//                        lastPhoneNum = phoneNum;
+//                    }
+//                } else {
+////                    sendMessage(Constant.CLEAN_TEXT);
+//                }
+//            }
+//        }
+//    }
 
     private class QRCodeHttpThread implements Runnable {
         String name, phoneNum, QRCode;
@@ -459,6 +570,9 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         }
     }
 
+    /**
+     * 解码二维码
+     */
     private Result decodeQR(Bitmap srcBitmap) {
         Result result = null;
         int width = srcBitmap.getWidth();
@@ -470,39 +584,35 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         QRCodeReader reader = new QRCodeReader();
         try {
             result = reader.decode(binaryBitmap, CodeHints.getDefaultDecodeHints());
-        } catch (NotFoundException e) {
-            e.printStackTrace();
-        } catch (ChecksumException e) {
-            e.printStackTrace();
-        } catch (FormatException e) {
+        } catch (NotFoundException | ChecksumException | FormatException e) {
             e.printStackTrace();
         }
         return result;
     }
 
     private void sendMessage(int what) {
-        Message msg = mHandler.obtainMessage();
+        Message msg = showHandler.obtainMessage();
         msg.what = what;
-        mHandler.sendMessage(msg);
+        showHandler.sendMessage(msg);
     }
 
     private void sendMessageDelayed(int what, long delayMillis) {
-        Message msg = mHandler.obtainMessage();
+        Message msg = showHandler.obtainMessage();
         msg.what = what;
-        mHandler.sendMessageDelayed(msg, delayMillis);
+        showHandler.sendMessageDelayed(msg, delayMillis);
     }
 
     private void welcome(String name) {
-        mHandler.removeCallbacksAndMessages(null);
-        Message msg = mHandler.obtainMessage();
+        showHandler.removeCallbacksAndMessages(null);
+        Message msg = showHandler.obtainMessage();
         msg.what = Constant.WELCOME;
         Bundle data = new Bundle();
         data.putString("name", name);
         msg.setData(data);
-        mHandler.sendMessage(msg);
+        showHandler.sendMessage(msg);
     }
 
-    private Handler mHandler = new Handler() {
+    private Handler showHandler = new Handler() {
         public void handleMessage(Message msg) {
             Bundle data;
             switch (msg.what) {
@@ -540,6 +650,9 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         return buffer.array();
     }
 
+    /**
+     * 人脸马赛克化
+     */
     private Bitmap encryptBitmap(Bitmap src) {
         int w = src.getWidth();
         int h = src.getHeight();

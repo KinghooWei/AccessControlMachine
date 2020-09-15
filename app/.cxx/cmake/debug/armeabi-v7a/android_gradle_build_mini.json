@@ -1,8 +1,8 @@
 {
   "buildFiles": [
-    "E:\\Program Files (x86)\\Android\\sdk\\ndk-bundle\\build\\cmake\\android.toolchain.cmake",
-    "F:\\project\\AS\\Attendance\\app\\src\\main\\cpp\\CMakeLists.txt",
-    "E:\\Program Files (x86)\\Android\\sdk\\ndk-bundle\\build\\cmake\\platforms.cmake"
+    "E:\\sdk\\ndk-bundle\\build\\cmake\\platforms.cmake",
+    "E:\\sdk\\ndk-bundle\\build\\cmake\\android.toolchain.cmake",
+    "F:\\project\\AS\\Attendance\\app\\src\\main\\cpp\\CMakeLists.txt"
   ],
   "cleanCommands": [
     "E:\\sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe -C \"F:\\project\\AS\\Attendance\\app\\.cxx\\cmake\\debug\\armeabi-v7a\" clean"

@@ -1,4 +1,4 @@
-﻿package com.xwlab.attendance;
+package com.lztek.tools.irmeter;
 
 /**
  * MLX906xx系列模块操作类.
@@ -18,10 +18,10 @@ public class MLX906xx {
     private native int _MLX90621_Measure(int refreshRate, float emissivity, float tr,
                                          float[] mlx90621Image, float[] mlx90621To);
 
-    private native int _MLX90640_InitProcedure(int refreshRate);//初始化
+    private native int _MLX90640_InitProcedure(int refreshRate);
     private native int _MLX90640_Measure(float emissivity, float tr,
                                          float[] mlx90640ImageP0, float[] mlx90640ImageP1,
-                                         float[] mlx90640ToP0, float[] mlx90640ToP1);//读取温度和像素值
+                                         float[] mlx90640ToP0, float[] mlx90640ToP1);
 
     private native int _MLX90614_Measure(float[] temp);
 
@@ -116,7 +116,7 @@ public class MLX906xx {
     /**
      * MLX90621模块温度、图像数据读取
      *
-     * @param //refreshRate
+     * @param refreshRate
      *             模块刷新频率，可选参数见MLX90640Refresh开头的常量
      * @param mlx90621Image
      *             图像数据返回数组，长度必须大于等于MLX90621_BUF_SIZE（64）
@@ -197,7 +197,7 @@ public class MLX906xx {
         if (!validMLX90640RefreshRate(mRefreshRate)) {
             throw new IllegalStateException("MLX90640 is not initialized!");
         }
-        return _MLX90640_Measure(0.90f, 0f, mlx90640ImageP0, mlx90640ImageP1,
+        return _MLX90640_Measure(0.95f, 0f, mlx90640ImageP0, mlx90640ImageP1,
                 mlx90640ToP0, mlx90640ToP1);
     }
 
@@ -250,7 +250,7 @@ public class MLX906xx {
         if (!validMLX90640RefreshRate(mRefreshRate)) {
             throw new IllegalStateException("MLX90640 is not initialized!");
         }
-        return _MLX90640_Measure(0.90f, 0f, mlx90640ImageP0, mlx90640ImageP1, null, null);
+        return _MLX90640_Measure(0.95f, 0f, mlx90640ImageP0, mlx90640ImageP1, null, null);
     }
 
     /**
@@ -273,7 +273,7 @@ public class MLX906xx {
         if (!validMLX90640RefreshRate(mRefreshRate)) {
             throw new IllegalStateException("MLX90640 is not initialized!");
         }
-        return _MLX90640_Measure(0.90f, 0f, null, null, mlx90640ToP0, mlx90640ToP1);
+        return _MLX90640_Measure(0.95f, 0f, null, null, mlx90640ToP0, mlx90640ToP1);
     }
 
     /**

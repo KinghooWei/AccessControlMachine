@@ -1,0 +1,1 @@
+[{"outputType":{"type":"MERGED_MANIFESTS"},"apkData":{"type":"MAIN","splits":[],"versionCode":1,"versionName":"1.0.1.20200226","enabled":true,"outputFile":"infraredLib-debug.aar","fullName":"debug","baseName":"debug","dirName":""},"path":"../../library_manifest/debug/AndroidManifest.xml","properties":{"packageId":"com.lztek.tools.irmeter","split":""}}]

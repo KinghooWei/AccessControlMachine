@@ -1,12 +1,12 @@
 {
   "stringTable": {
     "0": "F:/project/AS/Attendance/app/.cxx/cmake/debug/armeabi-v7a",
-    "1": "--target=armv7-none-linux-androideabi24 --gcc-toolchain=E:/Program Files (x86)/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64 --sysroot=E:/Program Files (x86)/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/sysroot -DFace_EXPORTS -IF:/project/AS/Attendance/app/src/main/cpp/include/ncnn -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -fno-addrsig -march=armv7-a -mthumb -Wa,--noexecstack -Wformat -Werror=format-security -fopenmp -O2 -fvisibility=hidden -fvisibility-inlines-hidden -fomit-frame-pointer -fstrict-aliasing -ffunction-sections -fdata-sections -std=c++11 -frtti -fexceptions -O0 -fno-limit-debug-info -fPIC"
+    "1": "--target=armv7-none-linux-androideabi24 --gcc-toolchain=E:/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64 --sysroot=E:/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/sysroot -DFace_EXPORTS -IF:/project/AS/Attendance/app/src/main/cpp/include/ncnn -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -fno-addrsig -march=armv7-a -mthumb -Wa,--noexecstack -Wformat -Werror=format-security -fopenmp -O2 -fvisibility=hidden -fvisibility-inlines-hidden -fomit-frame-pointer -fstrict-aliasing -ffunction-sections -fdata-sections -std=c++11 -frtti -fexceptions -O0 -fno-limit-debug-info -fPIC"
   },
   "buildFiles": [
-    "E:\\Program Files (x86)\\Android\\sdk\\ndk-bundle\\build\\cmake\\android.toolchain.cmake",
-    "F:\\project\\AS\\Attendance\\app\\src\\main\\cpp\\CMakeLists.txt",
-    "E:\\Program Files (x86)\\Android\\sdk\\ndk-bundle\\build\\cmake\\platforms.cmake"
+    "E:\\sdk\\ndk-bundle\\build\\cmake\\platforms.cmake",
+    "E:\\sdk\\ndk-bundle\\build\\cmake\\android.toolchain.cmake",
+    "F:\\project\\AS\\Attendance\\app\\src\\main\\cpp\\CMakeLists.txt"
   ],
   "cleanCommands": [
     "E:\\sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe -C \"F:\\project\\AS\\Attendance\\app\\.cxx\\cmake\\debug\\armeabi-v7a\" clean"
@@ -16,7 +16,7 @@
     "Face-Debug-armeabi-v7a": {
       "buildCommand": "E:\\sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe -C \"F:\\project\\AS\\Attendance\\app\\.cxx\\cmake\\debug\\armeabi-v7a\" Face",
       "buildType": "debug",
-      "toolchain": "2668806271",
+      "toolchain": "2449515126",
       "abi": "armeabi-v7a",
       "artifactName": "Face",
       "files": [
@@ -58,8 +58,8 @@
     }
   },
   "toolchains": {
-    "2668806271": {
-      "cppCompilerExecutable": "E:\\PROGRA~1\\Android\\sdk\\NDK-BU~1\\TOOLCH~1\\llvm\\prebuilt\\WINDOW~1\\bin\\CLANG_~1.EXE"
+    "2449515126": {
+      "cppCompilerExecutable": "E:\\sdk\\ndk-bundle\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang++.exe"
     }
   },
   "cFileExtensions": [],

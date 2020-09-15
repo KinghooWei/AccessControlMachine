@@ -17,7 +17,7 @@
 rule CXX_COMPILER__Face
   depfile = $DEP_FILE
   deps = gcc
-  command = E:\PROGRA~1\Android\sdk\NDK-BU~1\TOOLCH~1\llvm\prebuilt\WINDOW~1\bin\CLANG_~1.EXE --target=aarch64-none-linux-android24 --gcc-toolchain="E:/Program Files (x86)/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64" --sysroot="E:/Program Files (x86)/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/sysroot"  $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
+  command = E:\sdk\ndk-bundle\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --gcc-toolchain=E:/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64 --sysroot=E:/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/sysroot  $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
   description = Building CXX object $out
 
 
@@ -25,7 +25,7 @@ rule CXX_COMPILER__Face
 # Rule for linking CXX shared library.
 
 rule CXX_SHARED_LIBRARY_LINKER__Face
-  command = cmd.exe /C "$PRE_LINK && E:\PROGRA~1\Android\sdk\NDK-BU~1\TOOLCH~1\llvm\prebuilt\WINDOW~1\bin\CLANG_~1.EXE --target=aarch64-none-linux-android24 --gcc-toolchain="E:/Program Files (x86)/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64" --sysroot="E:/Program Files (x86)/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/sysroot" -fPIC $LANGUAGE_COMPILE_FLAGS $ARCH_FLAGS $LINK_FLAGS -shared $SONAME_FLAG$SONAME -o $TARGET_FILE $in $LINK_PATH $LINK_LIBRARIES && $POST_BUILD"
+  command = cmd.exe /C "$PRE_LINK && E:\sdk\ndk-bundle\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --gcc-toolchain=E:/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64 --sysroot=E:/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/sysroot -fPIC $LANGUAGE_COMPILE_FLAGS $ARCH_FLAGS $LINK_FLAGS -shared $SONAME_FLAG$SONAME -o $TARGET_FILE $in $LINK_PATH $LINK_LIBRARIES && $POST_BUILD"
   description = Linking CXX shared library $TARGET_FILE
   restat = $RESTAT
 

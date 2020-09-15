@@ -37,6 +37,10 @@ android {
             version "3.10.2"
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
@@ -50,4 +54,6 @@ dependencies {
     implementation files('F:/project/AS/Attendance/libs/zing-core-3.4.0.jar')
     implementation 'com.android.support:recyclerview-v7:25.0.0'
     implementation 'com.github.bumptech.glide:glide:4.11.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
 }

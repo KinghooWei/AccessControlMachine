@@ -16,8 +16,8 @@
         "ndk"
       ],
       "buildRoot": "F:\\project\\AS\\Attendance\\app\\.cxx\\cmake\\debug\\arm64-v8a",
-      "cmakeToolchain": "E:\\Program Files (x86)\\Android\\sdk\\ndk-bundle\\build\\cmake\\android.toolchain.cmake",
-      "cmakeExecutable": "E:\\Program Files (x86)\\Android\\sdk\\cmake\\3.10.2.4988404\\bin\\cmake.exe",
+      "cmakeToolchain": "E:\\sdk\\ndk-bundle\\build\\cmake\\android.toolchain.cmake",
+      "cmakeExecutable": "E:\\sdk\\cmake\\3.10.2.4988404\\bin\\cmake.exe",
       "variables": [
         {
           "name": "CMAKE_CXX_FLAGS",
@@ -37,7 +37,7 @@
         },
         {
           "name": "CMAKE_TOOLCHAIN_FILE",
-          "value": "E:\\Program Files (x86)\\Android\\sdk\\ndk-bundle\\build\\cmake\\android.toolchain.cmake"
+          "value": "E:\\sdk\\ndk-bundle\\build\\cmake\\android.toolchain.cmake"
         },
         {
           "name": "ANDROID_ABI",
@@ -45,7 +45,7 @@
         },
         {
           "name": "ANDROID_NDK",
-          "value": "E:\\Program Files (x86)\\Android\\sdk\\ndk-bundle"
+          "value": "E:\\sdk\\ndk-bundle"
         },
         {
           "name": "ANDROID_PLATFORM",
@@ -57,7 +57,7 @@
         },
         {
           "name": "CMAKE_ANDROID_NDK",
-          "value": "E:\\Program Files (x86)\\Android\\sdk\\ndk-bundle"
+          "value": "E:\\sdk\\ndk-bundle"
         },
         {
           "name": "CMAKE_EXPORT_COMPILE_COMMANDS",
@@ -69,7 +69,7 @@
         },
         {
           "name": "CMAKE_MAKE_PROGRAM",
-          "value": "E:\\Program Files (x86)\\Android\\sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe"
+          "value": "E:\\sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe"
         },
         {
           "name": "CMAKE_SYSTEM_NAME",
@@ -113,11 +113,11 @@
     "module": {
       "buildSystem": "CMAKE",
       "cmake": {
-        "cmakeExe": "E:\\Program Files (x86)\\Android\\sdk\\cmake\\3.10.2.4988404\\bin\\cmake.exe",
+        "cmakeExe": "E:\\sdk\\cmake\\3.10.2.4988404\\bin\\cmake.exe",
         "minimumCmakeVersion": "3.10.2",
-        "ninjaExe": "E:\\Program Files (x86)\\Android\\sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe"
+        "ninjaExe": "E:\\sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe"
       },
-      "cmakeToolchainFile": "E:\\Program Files (x86)\\Android\\sdk\\ndk-bundle\\build\\cmake\\android.toolchain.cmake",
+      "cmakeToolchainFile": "E:\\sdk\\ndk-bundle\\build\\cmake\\android.toolchain.cmake",
       "cxxFolder": "F:\\project\\AS\\Attendance\\app\\.cxx",
       "gradleModulePathName": ":app",
       "intermediatesFolder": "F:\\project\\AS\\Attendance\\app\\build\\intermediates",
@@ -130,7 +130,7 @@
         "X86",
         "X86_64"
       ],
-      "ndkFolder": "E:\\Program Files (x86)\\Android\\sdk\\ndk-bundle",
+      "ndkFolder": "E:\\sdk\\ndk-bundle",
       "ndkMetaAbiList": [
         {
           "abi": "ARMEABI_V7A",
@@ -193,16 +193,16 @@
         "isCmakeBuildCohabitationEnabled": false,
         "isNativeCompilerSettingsCacheEnabled": false,
         "rootBuildGradleFolder": "F:\\project\\AS\\Attendance",
-        "sdkFolder": "E:\\Program Files (x86)\\Android\\sdk",
+        "sdkFolder": "E:\\sdk",
         "isPrefabEnabled": false
       },
       "splitsAbiFilterSet": [],
       "stlSharedObjectMap": {
         "LIBCXX_SHARED": {
-          "ARMEABI_V7A": "E:\\Program Files (x86)\\Android\\sdk\\ndk-bundle\\toolchains\\llvm\\prebuilt\\windows-x86_64\\sysroot\\usr\\lib\\arm-linux-androideabi\\libc++_shared.so",
-          "ARM64_V8A": "E:\\Program Files (x86)\\Android\\sdk\\ndk-bundle\\toolchains\\llvm\\prebuilt\\windows-x86_64\\sysroot\\usr\\lib\\aarch64-linux-android\\libc++_shared.so",
-          "X86": "E:\\Program Files (x86)\\Android\\sdk\\ndk-bundle\\toolchains\\llvm\\prebuilt\\windows-x86_64\\sysroot\\usr\\lib\\i686-linux-android\\libc++_shared.so",
-          "X86_64": "E:\\Program Files (x86)\\Android\\sdk\\ndk-bundle\\toolchains\\llvm\\prebuilt\\windows-x86_64\\sysroot\\usr\\lib\\x86_64-linux-android\\libc++_shared.so"
+          "ARMEABI_V7A": "E:\\sdk\\ndk-bundle\\toolchains\\llvm\\prebuilt\\windows-x86_64\\sysroot\\usr\\lib\\arm-linux-androideabi\\libc++_shared.so",
+          "ARM64_V8A": "E:\\sdk\\ndk-bundle\\toolchains\\llvm\\prebuilt\\windows-x86_64\\sysroot\\usr\\lib\\aarch64-linux-android\\libc++_shared.so",
+          "X86": "E:\\sdk\\ndk-bundle\\toolchains\\llvm\\prebuilt\\windows-x86_64\\sysroot\\usr\\lib\\i686-linux-android\\libc++_shared.so",
+          "X86_64": "E:\\sdk\\ndk-bundle\\toolchains\\llvm\\prebuilt\\windows-x86_64\\sysroot\\usr\\lib\\x86_64-linux-android\\libc++_shared.so"
         },
         "LIBCXX_STATIC": {},
         "NONE": {},
