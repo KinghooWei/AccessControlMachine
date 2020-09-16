@@ -270,11 +270,11 @@ public class MLXGridView extends View {
     public void setTemperature(float[] temperatures, float[] images) {
         if (null != temperatures && null != mTemp) {
             System.arraycopy(temperatures, 0, mTemp, 0,
-                    mTemp.length < temperatures.length ? mTemp.length : temperatures.length);
+                    Math.min(mTemp.length, temperatures.length));
         }
         if (null != images && null != mImages) {
             System.arraycopy(images, 0, mImages, 0,
-                    mImages.length < images.length? mImages.length : images.length);
+                    Math.min(mImages.length, images.length));
         }
         invalidate();
     }

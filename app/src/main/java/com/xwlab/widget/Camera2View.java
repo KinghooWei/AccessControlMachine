@@ -47,6 +47,7 @@ public class Camera2View extends TextureView {
         mThreadHandler = new HandlerThread("camera2");
         mThreadHandler.start();
         mHandler = new Handler(mThreadHandler.getLooper());
+        setScaleX(-1f);
     }
 
     public void open(int camera_type) {

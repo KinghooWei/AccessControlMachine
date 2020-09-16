@@ -7,4 +7,6 @@ public class Constant {
     public static final int UNKNOWN = 3;
     public static final int CLEAN_TEXT = 4;
     public static final int VERIFY_SUCCESSFULLY = 5;
+    public static final int FAKE_FACE = 6;
+    public static final int THERMAL = 7;
 }
