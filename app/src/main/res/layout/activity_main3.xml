@@ -38,14 +38,23 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <ImageView
-                android:id="@+id/iv_face"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                app:layout_constraintBottom_toBottomOf="@id/cv_preview"
-                app:layout_constraintEnd_toEndOf="@+id/cv_preview"
-                app:layout_constraintStart_toStartOf="@id/cv_preview"
-                app:layout_constraintTop_toTopOf="@id/cv_preview" />
+            <com.xwlab.widget.FaceView
+                android:id="@+id/fv_face"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.6"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+<!--            <ImageView-->
+<!--                android:id="@+id/iv_face"-->
+<!--                android:layout_width="0dp"-->
+<!--                android:layout_height="0dp"-->
+<!--                app:layout_constraintBottom_toBottomOf="@id/cv_preview"-->
+<!--                app:layout_constraintEnd_toEndOf="@+id/cv_preview"-->
+<!--                app:layout_constraintStart_toStartOf="@id/cv_preview"-->
+<!--                app:layout_constraintTop_toTopOf="@id/cv_preview" />-->
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <com.xwlab.widget.MLXGridView
@@ -231,7 +240,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
-        android:text="开启加密模式"
+        android:text="关闭加密模式"
         android:textSize="24sp"
         app:layout_constraintBottom_toTopOf="@+id/constraintLayout"
         app:layout_constraintEnd_toEndOf="parent" />

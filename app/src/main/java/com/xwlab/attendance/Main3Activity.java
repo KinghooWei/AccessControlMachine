@@ -2,10 +2,8 @@ package com.xwlab.attendance;
 
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Matrix;
-import android.graphics.Paint;
+import android.graphics.Rect;
 import android.hardware.camera2.CameraCharacteristics;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -14,8 +12,8 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-//import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -23,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
 import com.google.zxing.BinaryBitmap;
@@ -34,13 +33,17 @@ import com.google.zxing.Result;
 import com.google.zxing.common.GlobalHistogramBinarizer;
 import com.google.zxing.qrcode.QRCodeReader;
 import com.lztek.tools.irmeter.MLX906xx;
+import com.xwlab.attendance.ui.DetectedViewModel;
+import com.xwlab.expression.ExpresionRegcognition;
 import com.xwlab.util.CodeHints;
 import com.xwlab.util.Constant;
 import com.xwlab.widget.Camera2View;
+import com.xwlab.widget.FaceView;
 import com.xwlab.widget.MLXGridView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.opencv.android.OpenCVLoader;
 
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -49,6 +52,8 @@ import java.util.Date;
 
 import static com.xwlab.attendance.HttpUtils.sendJsonPost;
 
+//import android.support.v7.app.AppCompatActivity;
+
 public class Main3Activity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "WorkActivity";
     private Face mFace = new Face();
@@ -56,20 +61,17 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
     private boolean workThreadFlag = true;
     private static File sdDir = Environment.getExternalStorageDirectory();
     private static final String sdPath = sdDir.toString() + "/attendance/";
+
     private Camera2View cvPreview;
     private ImageView ivFace, ivBackground;
     private TextView tvResult, etPwd;
+    private FaceView fvFace;
+
     private String password = "", showText = "";
-    private boolean encryption = false;     //1表示开启加密模式
+    private boolean encryption = true;     //1表示开启加密模式
     private Bitmap face;
     private Uri ringtoneUri = Uri.parse("android.resource://" + R.raw.beep);
     private Ringtone ringtone;
-
-//    private String lastUnknownFeature;
-//    private Long lastUnknownTime = 0L;
-//
-//    private boolean haveFace = false;
-//    private String lastName;
 
     protected Handler mHandler;
 
@@ -80,6 +82,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
 //    protected Spinner mSpnRefreshRate;
 
     Button btnEncrypt;
+    private DetectedViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +100,13 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         mHandler = new Handler();
         mGridView.setModuleType(MLXGridView.MLX90640);
         mMLX90640 = new MLX906xx();
+
+        if (!OpenCVLoader.initDebug()) {
+            Log.d("opencv", "初始化失败");
+        }
+
+        viewModel = new ViewModelProvider(this).get(DetectedViewModel.class);
+        viewModel.expression.observe(this, expression -> tvExpression.setText(expression));
     }
 
     @Override
@@ -104,8 +114,6 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         super.onStart();
         workThreadFlag = true;
         new Thread(new FDThread()).start();
-//        new Thread(new QRCodeScanThread()).start();
-//        onBtnAuto();
     }
 
     @Override
@@ -116,32 +124,32 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
 
     private Runnable mAutoRefreshRunnable = null;
 
-    private void onBtnAuto() {
-        if (null == mAutoRefreshRunnable) {
-            if (mlx90640InitializeCheck() < 0) {
-                return;
-            }
-            mAutoRefreshRunnable = new Runnable() {
-                @Override
-                public void run() {
-                    mlx90640Measure();
-                    int interval = 500;
-                    int refreshRate = mMLX90640.getRefreshRate();
-                    if (refreshRate != 0) {
-                        interval = ((1000 * 1000) >> (refreshRate - 1)) / 1000;
-                    } else {
-                        interval = 2000;
-                    }
-                    mHandler.removeCallbacks(this);
-                    mHandler.postDelayed(this, interval < 100 ? 500 : interval);
-                }
-            };
-            mHandler.postDelayed(mAutoRefreshRunnable, 100);
-        } else {
-            mHandler.removeCallbacks(mAutoRefreshRunnable);
-            mAutoRefreshRunnable = null;
-        }
-    }
+//    private void onBtnAuto() {
+//        if (null == mAutoRefreshRunnable) {
+//            if (mlx90640InitializeCheck() < 0) {
+//                return;
+//            }
+//            mAutoRefreshRunnable = new Runnable() {
+//                @Override
+//                public void run() {
+//                    mlx90640Measure();
+//                    int interval = 500;
+//                    int refreshRate = mMLX90640.getRefreshRate();
+//                    if (refreshRate != 0) {
+//                        interval = ((1000 * 1000) >> (refreshRate - 1)) / 1000;
+//                    } else {
+//                        interval = 2000;
+//                    }
+//                    mHandler.removeCallbacks(this);
+//                    mHandler.postDelayed(this, interval < 100 ? 500 : interval);
+//                }
+//            };
+//            mHandler.postDelayed(mAutoRefreshRunnable, 100);
+//        } else {
+//            mHandler.removeCallbacks(mAutoRefreshRunnable);
+//            mAutoRefreshRunnable = null;
+//        }
+//    }
 
     private int[] mRefreshRateValues = new int[]{
             MLX906xx.MLX90640Refresh1HZ,
@@ -201,12 +209,15 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         }
     }
 
+    private TextView tvExpression;
+
     private void UIInit() {
         mTvTemperature = findViewById(R.id.tv_temperature);
         mGridView = findViewById(R.id.grid24x32view);
         cvPreview = findViewById(R.id.cv_preview);
-
-        ivFace = findViewById(R.id.iv_face);
+        tvExpression = findViewById(R.id.tv_expression);
+//        ivFace = findViewById(R.id.iv_face);
+        fvFace = findViewById(R.id.fv_face);
         tvResult = findViewById(R.id.tv_result);
         etPwd = findViewById(R.id.et_pwd);
         btnEncrypt = findViewById(R.id.btn_encrypt);
@@ -282,14 +293,17 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
 
     private class FDThread implements Runnable {
         private String name, phoneNum;
-        private Long lastTime;
+        private Long lastTime, expressionTime = Long.valueOf(0), startTime, temperatureTime = Long.valueOf(0);
         private String QRCode, lastFacePhoneNum, lastQRCPhoneNum;
         Bitmap image, faceRect;
+        ExpresionRegcognition expresionRegcognition = new ExpresionRegcognition();
+        boolean trueFace = false;
 
         @Override
         public void run() {
             Logger.i(TAG, "start FDThread");
             while (!Thread.currentThread().isInterrupted() && workThreadFlag) {
+                startTime = System.currentTimeMillis();
                 image = cvPreview.getBitmap();
                 if (image == null) {
                     continue;
@@ -300,49 +314,61 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                 Matrix m = new Matrix();
                 m.postScale(-1, 1);
                 image = Bitmap.createBitmap(image, 0, 0, width, height, m, true);
+                Logger.i(TAG, "取画面并翻转：" + (System.currentTimeMillis() - startTime));
 
+                startTime = System.currentTimeMillis();
                 byte[] imageData = getPixelsRGBA(image);    //bitmap转字节数组
                 int[] faceInfo = mFace.FaceDetect(imageData, width, height, 4);
+                Logger.i(TAG, "人脸检测：" + (System.currentTimeMillis() - startTime));
+
+                startTime = System.currentTimeMillis();
                 if (faceInfo[0] > 0) {     //画面中有人脸
                     Logger.i(TAG, "检测到人脸");
+                    //表情识别
                     long sysTime = new Date().getTime();
+                    if (System.currentTimeMillis() - expressionTime > 2000) {
+                        expressionTime = System.currentTimeMillis();
+                        viewModel.detectFaceEmotion(image);
+                    }
+                    Logger.i(TAG, "表情识别：" + (System.currentTimeMillis() - startTime));
+
+                    startTime = System.currentTimeMillis();
                     //截取人脸
                     int left = faceInfo[1];
                     int top = faceInfo[2];
                     int right = faceInfo[3];
                     int bottom = faceInfo[4];
-                    boolean tureFace = liveDetect((float) left / width, (float) right / width, (float) top / height, (float) bottom / height);
+                    Rect rect = new Rect(left, top, right, bottom);
+                    //温度检测
+
+                    if (System.currentTimeMillis() - temperatureTime > 1000) {
+                        temperatureTime = System.currentTimeMillis();
+                        trueFace = liveDetect((float) left / width, (float) right / width, (float) top / height, (float) bottom / height);
+                        Logger.i(TAG, "温度检测：" + (System.currentTimeMillis() - startTime));
+                    }
+
+                    startTime = System.currentTimeMillis();
+                    //加密或者画矩形框
                     faceRect = Bitmap.createBitmap(image, left, top, right - left, bottom - top);
                     if (encryption == true) {
-                        face = encryptBitmap(image);
+                        fvFace.encryptFace(faceRect, rect);
                     } else {
-                        face = image;
+                        fvFace.drawRect(rect);
                     }
-                    Canvas canvas = new Canvas(face);
-                    Paint paint = new Paint();
-                    paint.setColor(Color.GREEN);
-                    paint.setStyle(Paint.Style.STROKE);
-                    paint.setStrokeWidth(3);
-                    canvas.drawRect(left, top, right, bottom, paint);
-                    sendMessage(Constant.UPDATE_FACE);
-//                    Bitmap circleBitmap = Bitmap.createBitmap(widthCan, widthCan, Bitmap.Config.ARGB_8888);
-//                    Canvas canvas = new Canvas(circleBitmap);
-//                    canvas.drawCircle(widthCan / 2f, widthCan / 2f, width / 2f, paint);
-//                    paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-//                    canvas.drawBitmap(faceRect, 0, 0, paint);
+                    Logger.i(TAG, "画框或加密：" + (System.currentTimeMillis() - startTime));
 
-//                    sendMessage(Constant.UPDATE_FACE);
-//                    timeDetectFace = System.currentTimeMillis() - timeDetectFace;
-//                    Logger.i(TAG, "face detect cost " + timeDetectFace);
-                    //人脸转字节数组
-                    byte[] faceDate = getPixelsRGBA(faceRect);
+                    startTime = System.currentTimeMillis();
                     //特征提取
+                    byte[] faceDate = getPixelsRGBA(faceRect);
                     String feature = mFace.FaceFeatureRestore(faceDate, faceRect.getWidth(), faceRect.getHeight());
+                    Logger.i(TAG, "特征提取：" + (System.currentTimeMillis() - startTime));
+
+                    startTime = System.currentTimeMillis();
                     Object[] objects = mFaceDatabase.featureCmp(feature);
                     name = (String) objects[0];
                     phoneNum = (String) objects[1];
                     if (!TextUtils.isEmpty(phoneNum)) {     //匹配成功
-                        if (tureFace) {
+                        if (trueFace) {
                             welcome(name);
                             sendMessageDelayed(Constant.CLEAN_TEXT, 2000);
                             long time = System.currentTimeMillis();
@@ -359,6 +385,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                             sendMessage(Constant.FAKE_FACE);
                             sendMessageDelayed(Constant.CLEAN_TEXT, 2000);
                         }
+                        Logger.i(TAG, "特征匹配：" + (System.currentTimeMillis() - startTime));
                     }
 //                    if (name.equals("unknown")) {
 //                        Logger.i(TAG, "unknown");
@@ -401,8 +428,9 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
 //                        new Thread(new FDHttpThread(phoneNum, name)).start();
 //                    }
                 } else {
+                    fvFace.clearCanvas();
 //                    haveFace = false;
-                    sendMessage(Constant.CLOSE_FACE);
+//                    sendMessage(Constant.CLOSE_FACE);
 
                     Result result = decodeQR(image);
                     if (result != null) {   //有二维码
@@ -447,35 +475,69 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
      * 活体检测
      */
     private boolean liveDetect(float relaLeft, float relaRight, float relaTop, float relaBottom) {
+        int width = 32;
+        int height = 24;
+        int thermalLeft = (int) (width * relaLeft);
+        int thermalRight = (int) (width * relaRight);
+        int thermalTop = (int) (height * relaTop);
+        int thermalBottom = (int) (height * relaBottom);
+        int w = thermalRight - thermalLeft;
+        int h = thermalBottom - thermalTop;
+
+        int faceArea = w * h;
+        int backgroundArea = (thermalBottom + 1) * width - faceArea;
+        int faceCount = 0;
+        int backgroundCount = 0;
+
         if (mlx90640InitializeCheck() < 0) {
             return false;
         }
         int ret = mMLX90640.MLX90640_Measure(mlx90640ImageP0, mlx90640ImageP1, mlx90640ToP0, mlx90640ToP1);
-
-        float max = Float.MIN_VALUE;
+//        Logger.i(TAG, "温度图"+Arrays.toString(mTemperature));
+        float[] max5 = new float[]{0, 0};
+        float min = 0;
+        int index = 0;
         for (int i = 0; i < 768; ++i) {
             mTemperature[i] = mlx90640ToP0[i] + mlx90640ToP1[i];
             mImages[i] = mlx90640ImageP0[i] + mlx90640ImageP1[i];
-            if (max < mTemperature[i]) {
-                max = mTemperature[i];
+//            if (max < mTemperature[i]) {
+//                max = mTemperature[i];
+//            }
+
+
+            if (i <= (thermalBottom + 1) * width) { //脖子以上区域
+                if ((i > (thermalTop + 1) * width) && ((i - thermalLeft) % width >= 0) && (i - thermalRight) % width < (thermalRight - thermalLeft)) {    //脸部区域
+                    if (mTemperature[i] > min) {    //求最大的五个温度值
+                        max5[index] = mTemperature[i];
+                        min = mTemperature[i];
+                        for (int j = 0; j < 2; j++) {
+                            if (min > max5[j]) {
+                                min = max5[j];
+                                index = j;
+                            }
+                        }
+                    }
+                    if (mTemperature[i] >= 26 && mTemperature[i] <= 41) {
+                        faceCount++;
+                    }
+
+                } else if (mTemperature[i] >= 30) {
+                    backgroundCount++;
+                }
             }
 
-            int width = 32;
-            int height = 24;
-            int thermalLeft = (int) (width * relaLeft);
-            int thermalRight = (int) (width * relaRight);
-            int thermalTop = (int) (height * relaTop);
-            int thermalBottom = (int) (height * relaBottom);
-            float w = thermalRight - thermalLeft;
-            float h = thermalBottom - thermalTop;
-
-            if (((i > thermalTop * width + thermalLeft) && (i < thermalTop * width + thermalRight)) ||
-                    ((i > thermalBottom * width + thermalLeft) && (i < thermalBottom * width + thermalRight)) ||
-                    ((((i - thermalLeft) % width == 0) || ((i - thermalRight) % width == 0)) && (i > thermalTop * width) && (i < thermalBottom * width))) {
+            if ((i >= thermalTop * width) && (i < (thermalBottom + 1) * width) &&
+                    (((i > thermalTop * width + thermalLeft) && (i <= thermalTop * width + thermalRight)) ||
+                            ((i > thermalBottom * width + thermalLeft) && (i <= thermalBottom * width + thermalRight)) ||
+                            ((i - thermalLeft) % width == 0) || ((i - thermalRight) % width == 0))) {
                 mTemperature[i] = 50;
-                mImages[i] = 100;
             }
         }
+        float sum = 0;
+        for (int j = 0; j < 2; j++) {
+            sum += max5[j];
+        }
+        faceTemperature = sum/2;
         System.out.println(Arrays.toString(mTemperature));
         System.out.println(Arrays.toString(mImages));
         if (ret == 0) {
@@ -486,7 +548,10 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
 //            mTvTemperature.setText("MLX90640数据读取错误");
             Toast.makeText(this, "MLX90640数据读取错误", Toast.LENGTH_LONG).show();
         }
-        return true;
+        float f = (float) faceCount / faceArea;
+        float b = (float) backgroundCount / backgroundArea;
+        Logger.i(TAG, "人脸：" + faceArea + "背景：" + backgroundArea + "人脸正常像素：" + faceCount + "比例：" + f + "背景异常像素：" + backgroundCount + "比例：" + b);
+        return (float) faceCount / faceArea > 0.6;
     }
 
     /*
@@ -529,64 +594,6 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-//    private class QRCodeScanThread implements Runnable {
-//        private String QRCode, phoneNum, lastPhoneNum;
-//        private Long lastTime;
-//        private boolean hasQR;
-//
-//        @Override
-//        public void run() {
-//            Logger.e(TAG, "start QRThread");
-//            while (!Thread.currentThread().isInterrupted()) {
-//                if (!workThreadFlag) {
-//                    return;
-//                }
-//                Bitmap image = cvPreview.getBitmap();
-//                if (image == null) {
-//                    continue;
-//                }
-//                Result result = decodeQR(image);
-//                if (result != null) {
-//                    String[] data = result.toString().split("-");
-//                    if (data.length == 3 && data[0].equals("blueCity")) {   //是目标二维码
-////                        Logger.e(TAG,result.toString());
-//                        Long sysTime = new Date().getTime();
-////                        Logger.i(TAG, sysTime.toString());
-//                        if (data[1].equals(lastPhoneNum)) {     //与上一个二维码相同
-//                            Long time = sysTime - lastTime;
-////                            Logger.i(TAG, time.toString());
-//                            if (time > 2000) {     //间隔大于2秒
-//                                phoneNum = data[1];
-//                                QRCode = data[2];
-//                                if (ringtone != null) {
-//                                    // 停止播放铃声
-//                                    ringtone.stop();
-//                                }
-//                                ringtone = RingtoneManager.getRingtone(Main3Activity.this, ringtoneUri);
-//                                ringtone.play();
-//                                new Thread(new QRCodeHttpThread(phoneNum, QRCode)).start();
-//                            }
-//                        } else {        //与上一个二维码不同
-//                            phoneNum = data[1];
-//                            QRCode = data[2];
-//                            if (ringtone != null) {
-//                                // 停止播放铃声
-//                                ringtone.stop();
-//                            }
-//                            ringtone = RingtoneManager.getRingtone(Main3Activity.this, ringtoneUri);
-//                            ringtone.play();
-//                            new Thread(new QRCodeHttpThread(phoneNum, QRCode)).start();
-//                        }
-//                        lastTime = sysTime;
-//                        lastPhoneNum = phoneNum;
-//                    }
-//                } else {
-////                    sendMessage(Constant.CLEAN_TEXT);
-//                }
-//            }
-//        }
-//    }
-
     private class QRCodeHttpThread implements Runnable {
         String name, phoneNum, QRCode;
 
@@ -597,7 +604,6 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
 
         @Override
         public void run() {
-
             JSONObject requestBody = new JSONObject();
             try {
                 requestBody.put("service", "door.attendance.QRCode");
@@ -621,7 +627,6 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
         }
     }
 
@@ -667,6 +672,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         showHandler.sendMessage(msg);
     }
 
+    float faceTemperature;
     private Handler showHandler = new Handler() {
         public void handleMessage(Message msg) {
             Bundle data;
@@ -698,7 +704,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                     tvResult.setText("疑似假脸");
                     break;
                 case Constant.THERMAL:
-//                        mTvTemperature.setText("当前温度：" + Utils.t1f(max) + "度");
+                    mTvTemperature.setText("当前温度：" + Utils.t1f(faceTemperature) + "度");
                     mGridView.setTemperature(mTemperature, mImages);
                     break;
             }

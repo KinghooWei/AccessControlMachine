@@ -9,4 +9,5 @@ public class Constant {
     public static final int VERIFY_SUCCESSFULLY = 5;
     public static final int FAKE_FACE = 6;
     public static final int THERMAL = 7;
+    public static final int EXPRESSION = 8;
 }

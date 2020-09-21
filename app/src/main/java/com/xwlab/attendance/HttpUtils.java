@@ -18,6 +18,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+
 public class HttpUtils {
     private static String jsonApiUrl = "http://192.168.1.220:8080/door/api"; //通用的json api接口
     private static String multipartApiUrl = "http://192.168.43.178:8080/door/multipartApi/"; //通用的multipart api接口
@@ -175,4 +179,12 @@ public class HttpUtils {
         return simpleDateFormat.format(date);
     }
 
+    public static void sendOkHttpRequest(String address, MultipartBody.Builder requestBody, okhttp3.Callback callback) {
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url(address)
+                .post(requestBody.build())
+                .build();
+        client.newCall(request).enqueue(callback);
+    }
 }

@@ -12,6 +12,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+
 public class HttpService {
     private static final String TAG = "HttpService";
     private static String name = "";
@@ -78,5 +82,4 @@ public class HttpService {
             }
         }.start();
     }
-
 }
