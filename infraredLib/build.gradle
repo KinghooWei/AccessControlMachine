@@ -36,5 +36,6 @@ android {
 }
 
 dependencies {
+implementation files('..\\libs\\libandroid_tensorflow_inference_java.jar')
 }
 

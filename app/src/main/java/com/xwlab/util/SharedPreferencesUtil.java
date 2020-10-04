@@ -3,13 +3,12 @@ package com.xwlab.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.xwlab.attendance.AttendanceApplication;
+
 public class SharedPreferencesUtil {
 
-    private SharedPreferences shp;
+    private SharedPreferences shp = AttendanceApplication.context.getSharedPreferences("attendance", Context.MODE_PRIVATE);
 
-    public SharedPreferencesUtil(Context context) {
-        shp = context.getSharedPreferences("attendance", Context.MODE_PRIVATE);
-    }
 
     public void saveString(String key, String name) {
         SharedPreferences.Editor editor = shp.edit();

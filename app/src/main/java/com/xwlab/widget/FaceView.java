@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
@@ -81,12 +82,9 @@ public class FaceView extends View {
         super.onDraw(canvas);
         canvas.translate(0, 0);
         switch (canvasState) {
-            case EMPTY: {
-                Paint paint = new Paint();
-                paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
-                canvas.drawPaint(paint);
-                //canvas.drawColor(Color.BLUE);
-            }
+            case EMPTY:
+                Path path= new Path();
+                path.reset();
                 break;
             case RECT:
                 Paint paint = new Paint();
@@ -120,13 +118,17 @@ public class FaceView extends View {
         mHandler.sendEmptyMessage(0);
     }
 
-    public void encryptFace(Bitmap face, Rect rect) {
-        canvasState = ENCRYPT;
+    public Bitmap encryptFace(Bitmap face) {
+
         double key = keyValue(face);          					// 密钥值
         // 加密
-        mBitmap = processBitmap(face, key);
+        return processBitmap(face, key);
+    }
+
+    public void showEncryptFace(Bitmap face, Rect rect) {
+        canvasState = ENCRYPT;
+        mBitmap = face;
         pos = rect;
-//        invalidate();
         mHandler.sendEmptyMessage(0);
     }
 

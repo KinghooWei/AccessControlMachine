@@ -1,16 +1,22 @@
 package com.xwlab.attendance.ui;
 
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
 import com.xwlab.attendance.HttpUtils;
 import com.xwlab.attendance.Logger;
+import com.xwlab.attendance.logic.Repository;
+import com.xwlab.attendance.logic.model.RelativeRect;
+import com.xwlab.attendance.logic.model.TemperatureInfo;
 import com.xwlab.util.Constant;
 
 import org.json.JSONObject;
@@ -30,7 +36,7 @@ public class DetectedViewModel extends ViewModel {
     private static final String TAG = "DetectedViewModel";
     public MutableLiveData<String> expression = new MutableLiveData<>();
 
-    private MutableLiveData<Bitmap> imageLiveData = new MutableLiveData<>();
+//    private MutableLiveData<Bitmap> imageLiveData = new MutableLiveData<>();
 
     String detectResult;
 
@@ -78,14 +84,14 @@ public class DetectedViewModel extends ViewModel {
                         if (ret == sadness) {
                             detectResult = "难过";
                         } else if (ret == neutral) {
-                            detectResult = "一般";
+                            detectResult = "平静";
                         } else if (ret == disgust) {
                             detectResult = "厌恶";
                         } else if (ret == anger) {
                             detectResult = "生气";
                         } else if (ret == surprise) {
                             detectResult = "惊讶";
-                        } else if (ret == surprise) {
+                        } else if (ret == fear) {
                             detectResult = "恐惧";
                         } else if (ret == happiness) {
                             detectResult = "高兴";
@@ -101,6 +107,11 @@ public class DetectedViewModel extends ViewModel {
         }
     }
 
+    //    public void detectExpression(Bitmap bitmap) {
+//        imageLiveData.setValue(bitmap);
+//    }
+//
+//    LiveData<String> expressionLiveData = Transformations.switchMap(imageLiveData,bitmap->{return Repository.getInstance().detectExpression(bitmap);});
     private void sendMessage(int what) {
         Message msg = handler.obtainMessage();
         msg.what = what;
@@ -115,7 +126,29 @@ public class DetectedViewModel extends ViewModel {
 //                    Glide.with(Main3Activity.this).load(face).into(ivFace);
                     expression.setValue(detectResult);
                     break;
+                case Constant.LIVE_DETECT:
+                    Bundle bundle = msg.getData();
+                    faceRectLiveData.setValue(new RelativeRect(bundle.getFloat("left"), bundle.getFloat("top"), bundle.getFloat("right"), bundle.getFloat("bottom")));
             }
         }
     };
+
+    //温度检测
+
+    private MutableLiveData<RelativeRect> faceRectLiveData = new MutableLiveData<>();
+    public LiveData<TemperatureInfo> temperatureInfoLiveData = Transformations.switchMap(faceRectLiveData, faceRect -> Repository.getInstance().liveDetect(faceRect));
+
+    public void liveDetect(float left, float top, float right, float bottom) {
+//        faceRectLiveData.setValue(faceRect);
+        Bundle bundle = new Bundle();
+        bundle.putFloat("left", left);
+        bundle.putFloat("top", top);
+        bundle.putFloat("right", right);
+        bundle.putFloat("bottom", bottom);
+        Message message = Message.obtain();
+        message.setData(bundle);
+        message.what = Constant.LIVE_DETECT;
+        handler.sendMessage(message);
+    }
+
 }

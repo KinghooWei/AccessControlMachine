@@ -57,7 +57,7 @@ public class InitActivity extends AppCompatActivity implements AdapterView.OnIte
 //        } catch (CameraAccessException e) {
 //            e.printStackTrace();
 //        }
-        shareUtil = new SharedPreferencesUtil(this);
+        shareUtil = new SharedPreferencesUtil();
         hasAddress = shareUtil.loadBoolean("hasAddress", false);
         cityArray = new String[]{"请选择"};
         communityArray = new String[]{"请选择"};

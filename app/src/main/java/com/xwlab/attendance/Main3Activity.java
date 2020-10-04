@@ -14,16 +14,21 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.ChecksumException;
 import com.google.zxing.FormatException;
@@ -33,6 +38,7 @@ import com.google.zxing.Result;
 import com.google.zxing.common.GlobalHistogramBinarizer;
 import com.google.zxing.qrcode.QRCodeReader;
 import com.lztek.tools.irmeter.MLX906xx;
+import com.xwlab.attendance.logic.model.TemperatureInfo;
 import com.xwlab.attendance.ui.DetectedViewModel;
 import com.xwlab.expression.ExpresionRegcognition;
 import com.xwlab.util.CodeHints;
@@ -47,39 +53,33 @@ import org.opencv.android.OpenCVLoader;
 
 import java.io.File;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.Date;
 
 import static com.xwlab.attendance.HttpUtils.sendJsonPost;
-
-//import android.support.v7.app.AppCompatActivity;
 
 public class Main3Activity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "WorkActivity";
     private Face mFace = new Face();
     private FaceDatabase mFaceDatabase;
-    private boolean workThreadFlag = true;
+    private boolean workThreadFlag;
     private static File sdDir = Environment.getExternalStorageDirectory();
     private static final String sdPath = sdDir.toString() + "/attendance/";
 
     private Camera2View cvPreview;
-    private ImageView ivFace, ivBackground;
     private TextView tvResult, etPwd;
     private FaceView fvFace;
+    protected TextView tvTemperature;
+    protected MLXGridView mGridView;
+    private FloatingActionButton fabSwitch;
 
     private String password = "", showText = "";
     private boolean encryption = true;     //1表示开启加密模式
     private Bitmap face;
     private Uri ringtoneUri = Uri.parse("android.resource://" + R.raw.beep);
     private Ringtone ringtone;
+    private boolean isRealFace = false;
 
-    protected Handler mHandler;
-
-    protected MLX906xx mMLX90640;
-    protected TextView mTvTemperature;
-    protected MLXGridView mGridView;
-
-//    protected Spinner mSpnRefreshRate;
+//    protected MLX906xx mMLX90640;
 
     Button btnEncrypt;
     private DetectedViewModel viewModel;
@@ -91,22 +91,24 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main3);
+        setSupportActionBar(findViewById(R.id.toolbar));
+        viewModel = new ViewModelProvider(this).get(DetectedViewModel.class);
         UIInit();
         //初始化人脸识别模型、更新加载数据库
         mFace.FaceModelInit(sdPath);
         mFaceDatabase = new FaceDatabase(getApplicationContext());
         mFaceDatabase.updateDatabase();
 
-        mHandler = new Handler();
-        mGridView.setModuleType(MLXGridView.MLX90640);
-        mMLX90640 = new MLX906xx();
+//        mMLX90640 = new MLX906xx();
+        mlx90640InitializeCheck();
 
         if (!OpenCVLoader.initDebug()) {
             Log.d("opencv", "初始化失败");
         }
 
-        viewModel = new ViewModelProvider(this).get(DetectedViewModel.class);
-        viewModel.expression.observe(this, expression -> tvExpression.setText(expression));
+//                cvPreview.open(CameraCharacteristics.LENS_FACING_BACK);//平板
+        cvPreview.open(CameraCharacteristics.LENS_FACING_FRONT);//3288
+//        cvPreview.open(CameraCharacteristics.LENS_FACING_EXTERNAL);//3288
     }
 
     @Override
@@ -122,7 +124,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         workThreadFlag = false;
     }
 
-    private Runnable mAutoRefreshRunnable = null;
+//    private Runnable mAutoRefreshRunnable = null;
 
 //    private void onBtnAuto() {
 //        if (null == mAutoRefreshRunnable) {
@@ -151,6 +153,37 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
 //        }
 //    }
 
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.function, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.downloadDb:
+                tvResult.setText("正在更新数据库...");
+                mFaceDatabase.updateDatabase();
+                tvResult.setText("数据库更新完毕");
+                sendMessageDelayed(Constant.CLEAN_TEXT,1000);
+                break;
+            case R.id.encrypt:
+                if (!encryption) {
+                    item.setIcon(R.drawable.ic_jiami);
+                    encryption = true;
+//                cvPreview.setVisibility(View.INVISIBLE);
+                } else {
+                    item.setIcon(R.drawable.ic_bujiami);
+                    encryption = false;
+//                cvPreview.setVisibility(View.VISIBLE);
+                }
+                break;
+        }
+        return true;
+    }
+
     private int[] mRefreshRateValues = new int[]{
             MLX906xx.MLX90640Refresh1HZ,
             MLX906xx.MLX90640Refresh2HZ,
@@ -163,67 +196,48 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
 
         int refreshRate = mRefreshRateValues[4];
 
-        if (refreshRate == mMLX90640.getRefreshRate()) {
+        if (refreshRate == AttendanceApplication.MLX90640.getRefreshRate()) {
             return refreshRate;
         }
 
-        int ret = mMLX90640.MLX90640_InitProcedure(refreshRate);
+        int ret = AttendanceApplication.MLX90640.MLX90640_InitProcedure(refreshRate);
         if (0 != ret) {
             Toast.makeText(this, "MLX90640初始化失败", Toast.LENGTH_LONG).show();
 //            mTvTemperature.setText("MLX90640初始化失败！");
             return ret;
         } else {
 //            mTvTemperature.setText("MLX90640初始化成功!");
-            return mMLX90640.getRefreshRate();
+            return AttendanceApplication.MLX90640.getRefreshRate();
         }
     }
 
 
-    float[] mlx90640ImageP0 = new float[768];
-    float[] mlx90640ImageP1 = new float[768];
-    float[] mlx90640ToP0 = new float[768];
-    float[] mlx90640ToP1 = new float[768];
+//    float[] mlx90640ImageP0 = new float[768];
+//    float[] mlx90640ImageP1 = new float[768];
+//    float[] mlx90640ToP0 = new float[768];
+//    float[] mlx90640ToP1 = new float[768];
 
-    float[] mTemperature = new float[768];
-    float[] mImages = new float[768];
-
-    protected void mlx90640Measure() {
-        int ret = mMLX90640.MLX90640_Measure(mlx90640ImageP0, mlx90640ImageP1, mlx90640ToP0, mlx90640ToP1);
-
-        float max = Float.MIN_VALUE;
-        for (int i = 0; i < 768; ++i) {
-            mTemperature[i] = mlx90640ToP0[i] + mlx90640ToP1[i];
-            mImages[i] = mlx90640ImageP0[i] + mlx90640ImageP1[i];
-            if (max < mTemperature[i]) {
-                max = mTemperature[i];
-            }
-        }
-        System.out.println(Arrays.toString(mTemperature));
-        System.out.println(Arrays.toString(mImages));
-        if (ret == 0) {
-            mTvTemperature.setText("当前温度：" + Utils.t1f(max) + "度");
-            mGridView.setTemperature(mTemperature, mImages);
-        } else {
-            mTvTemperature.setText("MLX90640数据读取错误");
-            Toast.makeText(this, "MLX90640数据读取错误", Toast.LENGTH_LONG).show();
-        }
-    }
+//    float[] mTemperature = new float[768];
+//    float[] mImages = new float[768];
 
     private TextView tvExpression;
 
     private void UIInit() {
-        mTvTemperature = findViewById(R.id.tv_temperature);
+        tvTemperature = findViewById(R.id.tv_temperature);
         mGridView = findViewById(R.id.grid24x32view);
         cvPreview = findViewById(R.id.cv_preview);
         tvExpression = findViewById(R.id.tv_expression);
-//        ivFace = findViewById(R.id.iv_face);
         fvFace = findViewById(R.id.fv_face);
         tvResult = findViewById(R.id.tv_result);
         etPwd = findViewById(R.id.et_pwd);
-        btnEncrypt = findViewById(R.id.btn_encrypt);
-        ivBackground = findViewById(R.id.iv_background);
-        Glide.with(this).load(R.drawable.access_background).into(ivBackground);
+//        btnEncrypt = findViewById(R.id.btn_encrypt);
+        fabSwitch = findViewById(R.id.fab_switch);
+        ImageView ivBackground = findViewById(R.id.iv_background);
 
+        Glide.with(this).load(R.drawable.access_background).into(ivBackground);
+        mGridView.setModuleType(MLXGridView.MLX90640);
+
+        fabSwitch.setOnClickListener(this);
         findViewById(R.id.button1).setOnClickListener(this);
         findViewById(R.id.button2).setOnClickListener(this);
         findViewById(R.id.button3).setOnClickListener(this);
@@ -235,11 +249,22 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         findViewById(R.id.button9).setOnClickListener(this);
         findViewById(R.id.button0).setOnClickListener(this);
         findViewById(R.id.button_cancel).setOnClickListener(this);
-        findViewById(R.id.btn_encrypt).setOnClickListener(this);
-        findViewById(R.id.btn_updateSQL).setOnClickListener(this);
-//        cvPreview.open(CameraCharacteristics.LENS_FACING_BACK);//平板
-        cvPreview.open(CameraCharacteristics.LENS_FACING_FRONT);//3288
-//        cvPreview.open(CameraCharacteristics.LENS_FACING_EXTERNAL);//3288
+//        btnEncrypt.setOnClickListener(this);
+//        findViewById(R.id.btn_updateSQL).setOnClickListener(this);
+
+        viewModel.expression.observe(this, expression -> tvExpression.setText(expression));
+        viewModel.temperatureInfoLiveData.observe(this, new Observer<TemperatureInfo>() {
+            @Override
+            public void onChanged(TemperatureInfo temperatureInfo) {
+                float[] temperatures = temperatureInfo.getTemperatures();
+                float[] pixels = temperatureInfo.getPixels();
+                float temperature = temperatureInfo.getFaceTemperature();
+                boolean realFace = temperatureInfo.isRealFace();
+                tvTemperature.setText("当前温度：" + Utils.t1f(temperature) + "度");
+                mGridView.setTemperature(temperatures, pixels);
+                isRealFace = realFace;
+            }
+        });
     }
 
 
@@ -247,27 +272,42 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
     public void onClick(View view) {
         int resId = view.getId(); // 获得当前按钮的编号
         switch (resId) {
-            case R.id.btn_encrypt:
-                if (encryption == false) {
-                    btnEncrypt.setText("关闭加密模式");
-                    encryption = true;
-//                cvPreview.setVisibility(View.INVISIBLE);
+            case R.id.fab_switch:
+                if (workThreadFlag) {
+                    workThreadFlag = false;
+                    findViewById(R.id.cl_camera).setVisibility(View.GONE);
+                    findViewById(R.id.cl_keyboard).setVisibility(View.VISIBLE);
+                    fabSwitch.setImageResource(R.drawable.ic_saomiao);
                 } else {
-                    btnEncrypt.setText("开启加密模式");
-                    encryption = false;
-//                cvPreview.setVisibility(View.VISIBLE);
+                    findViewById(R.id.cl_keyboard).setVisibility(View.GONE);
+                    findViewById(R.id.cl_camera).setVisibility(View.VISIBLE);
+                    fabSwitch.setImageResource(R.drawable.ic_keyboard);
+                    workThreadFlag = true;
+                    new Thread(new FDThread()).start();
                 }
                 break;
+//            case R.id.btn_encrypt:
+//                if (encryption == false) {
+//                    btnEncrypt.setText("关闭加密模式");
+//                    encryption = true;
+////                cvPreview.setVisibility(View.INVISIBLE);
+//                } else {
+//                    btnEncrypt.setText("开启加密模式");
+//                    encryption = false;
+////                cvPreview.setVisibility(View.VISIBLE);
+//                }
+//                break;
             case R.id.button_cancel:
                 tvResult.setText("");
                 if (password.length() > 0) {
                     password = password.substring(0, password.length() - 1);
                     showText = showText.substring(0, showText.length() - 1);
                 }
+                etPwd.setText(showText);
                 break;
-            case R.id.btn_updateSQL:
-                mFaceDatabase.updateDatabase();
-                break;
+//            case R.id.btn_updateSQL:
+//                mFaceDatabase.updateDatabase();
+//                break;
             default:
                 if (password.length() < 6) {
                     String inputText = ((TextView) view).getText().toString();
@@ -286,25 +326,33 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                 } else {
                     tvResult.setText("");
                 }
+                etPwd.setText(showText);
                 break;
         }
-        etPwd.setText(showText);
+
     }
 
     private class FDThread implements Runnable {
-        private String name, phoneNum;
-        private Long lastTime, expressionTime = Long.valueOf(0), startTime, temperatureTime = Long.valueOf(0);
-        private String QRCode, lastFacePhoneNum, lastQRCPhoneNum;
-        Bitmap image, faceRect;
-        ExpresionRegcognition expresionRegcognition = new ExpresionRegcognition();
-        boolean trueFace = false;
+        private String name;
+        private String phoneNum;
+        private long lastTime;
+        private long expressionTime = 0L;
+        private long startTime;
+        private long temperatureTime = 0L;
+        private String QRCode;
+        private String lastFacePhoneNum;
+        private String lastQRCPhoneNum;
+        private Bitmap face;
+        private Bitmap faceRect;
+        private ExpresionRegcognition expresionRegcognition = new ExpresionRegcognition();
+//        boolean trueFace = false;
 
         @Override
         public void run() {
             Logger.i(TAG, "start FDThread");
             while (!Thread.currentThread().isInterrupted() && workThreadFlag) {
                 startTime = System.currentTimeMillis();
-                image = cvPreview.getBitmap();
+                Bitmap image = cvPreview.getBitmap();
                 if (image == null) {
                     continue;
                 }
@@ -313,45 +361,55 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                 //镜像水平翻转
                 Matrix m = new Matrix();
                 m.postScale(-1, 1);
-                image = Bitmap.createBitmap(image, 0, 0, width, height, m, true);
+                face = Bitmap.createBitmap(image, 0, 0, width, height, m, true);
                 Logger.i(TAG, "取画面并翻转：" + (System.currentTimeMillis() - startTime));
 
                 startTime = System.currentTimeMillis();
-                byte[] imageData = getPixelsRGBA(image);    //bitmap转字节数组
+                byte[] imageData = getPixelsRGBA(face);    //bitmap转字节数组
                 int[] faceInfo = mFace.FaceDetect(imageData, width, height, 4);
                 Logger.i(TAG, "人脸检测：" + (System.currentTimeMillis() - startTime));
 
                 startTime = System.currentTimeMillis();
-                if (faceInfo[0] > 0) {     //画面中有人脸
+                int num = faceInfo[0];
+                if (num > 0) {     //画面中有人脸
                     Logger.i(TAG, "检测到人脸");
                     //表情识别
                     long sysTime = new Date().getTime();
                     if (System.currentTimeMillis() - expressionTime > 2000) {
                         expressionTime = System.currentTimeMillis();
-                        viewModel.detectFaceEmotion(image);
+                        viewModel.detectFaceEmotion(face);
                     }
                     Logger.i(TAG, "表情识别：" + (System.currentTimeMillis() - startTime));
 
                     startTime = System.currentTimeMillis();
-                    //截取人脸
-                    int left = faceInfo[1];
-                    int top = faceInfo[2];
-                    int right = faceInfo[3];
-                    int bottom = faceInfo[4];
+                    //截取最大的人脸
+                    int maxWidth=0;
+                    int j = 0;
+                    for (int i = 0;i<num;i++){
+                        int w = faceInfo[5*i+3] -faceInfo[5*i+1];
+                        if(w>maxWidth){
+                            maxWidth=w;
+                            j=i;
+                        }
+                    }
+                    int left = faceInfo[5*j+1];
+                    int top = faceInfo[5*j+2];
+                    int right = faceInfo[5*j+3];
+                    int bottom = faceInfo[5*j+4];
                     Rect rect = new Rect(left, top, right, bottom);
                     //温度检测
-
                     if (System.currentTimeMillis() - temperatureTime > 1000) {
                         temperatureTime = System.currentTimeMillis();
-                        trueFace = liveDetect((float) left / width, (float) right / width, (float) top / height, (float) bottom / height);
+                        viewModel.liveDetect((float) left / width, (float) top / height, (float) right / width, (float) bottom / height);
                         Logger.i(TAG, "温度检测：" + (System.currentTimeMillis() - startTime));
                     }
 
                     startTime = System.currentTimeMillis();
                     //加密或者画矩形框
-                    faceRect = Bitmap.createBitmap(image, left, top, right - left, bottom - top);
-                    if (encryption == true) {
-                        fvFace.encryptFace(faceRect, rect);
+                    faceRect = Bitmap.createBitmap(face, left, top, right - left, bottom - top);
+                    Bitmap faceEncrypt = fvFace.encryptFace(faceRect);
+                    if (encryption) {
+                        fvFace.showEncryptFace(faceEncrypt, rect);
                     } else {
                         fvFace.drawRect(rect);
                     }
@@ -368,18 +426,20 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                     name = (String) objects[0];
                     phoneNum = (String) objects[1];
                     if (!TextUtils.isEmpty(phoneNum)) {     //匹配成功
-                        if (trueFace) {
+                        if (isRealFace) {
                             welcome(name);
                             sendMessageDelayed(Constant.CLEAN_TEXT, 2000);
                             long time = System.currentTimeMillis();
                             if (phoneNum.equals(lastFacePhoneNum)) {        //与上一位识别的人相同
                                 long interval = System.currentTimeMillis() - time;
                                 if (interval > 5000) {
-                                    new Thread(new FDHttpThread(phoneNum, name)).start();
+                                    String faceBase64 = Utils.bitmapToBase64(faceEncrypt);
+                                    new Thread(new FDHttpThread(phoneNum, name, faceBase64)).start();
                                 }
                             } else {            //与上一位识别的人不相同
                                 lastFacePhoneNum = phoneNum;
-                                new Thread(new FDHttpThread(phoneNum, name)).start();
+                                String faceBase64 = Utils.bitmapToBase64(faceEncrypt);
+                                new Thread(new FDHttpThread(phoneNum, name, faceBase64)).start();
                             }
                         } else {
                             sendMessage(Constant.FAKE_FACE);
@@ -429,6 +489,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
 //                    }
                 } else {
                     fvFace.clearCanvas();
+                    sendMessageDelayed(Constant.CLEAN_EXPRESSION_AND_TEMPERATURE, 1000);
 //                    haveFace = false;
 //                    sendMessage(Constant.CLOSE_FACE);
 
@@ -474,95 +535,120 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
     /**
      * 活体检测
      */
-    private boolean liveDetect(float relaLeft, float relaRight, float relaTop, float relaBottom) {
-        int width = 32;
-        int height = 24;
-        int thermalLeft = (int) (width * relaLeft);
-        int thermalRight = (int) (width * relaRight);
-        int thermalTop = (int) (height * relaTop);
-        int thermalBottom = (int) (height * relaBottom);
-        int w = thermalRight - thermalLeft;
-        int h = thermalBottom - thermalTop;
-
-        int faceArea = w * h;
-        int backgroundArea = (thermalBottom + 1) * width - faceArea;
-        int faceCount = 0;
-        int backgroundCount = 0;
-
-        if (mlx90640InitializeCheck() < 0) {
-            return false;
-        }
-        int ret = mMLX90640.MLX90640_Measure(mlx90640ImageP0, mlx90640ImageP1, mlx90640ToP0, mlx90640ToP1);
+//    private boolean liveDetect(float relaLeft, float relaRight, float relaTop, float relaBottom) {
+//        int width = 32;
+//        int height = 24;
+//        int thermalLeft = (int) (width * relaLeft);
+//        int thermalRight = (int) (width * relaRight);
+//        int thermalTop = (int) (height * relaTop);
+//        int thermalBottom = (int) (height * relaBottom);
+//        int w = thermalRight - thermalLeft;
+//        int h = thermalBottom - thermalTop;
+//
+//        int faceArea = w * h;
+//        int backgroundArea = (thermalBottom + 1) * width - faceArea;
+//        int faceCount = 0;
+//        int backgroundCount = 0;
+//
+//
+//        int ret = mMLX90640.MLX90640_Measure(mlx90640ImageP0, mlx90640ImageP1, mlx90640ToP0, mlx90640ToP1);
 //        Logger.i(TAG, "温度图"+Arrays.toString(mTemperature));
-        float[] max5 = new float[]{0, 0};
-        float min = 0;
-        int index = 0;
-        for (int i = 0; i < 768; ++i) {
-            mTemperature[i] = mlx90640ToP0[i] + mlx90640ToP1[i];
-            mImages[i] = mlx90640ImageP0[i] + mlx90640ImageP1[i];
+//        float[] max5 = new float[]{0, 0};
+//        float min = 0;
+//        int index = 0;
+//        max = 0L;
+//        for (int i = 0; i < 768; ++i) {
+//            mTemperature[i] = mlx90640ToP0[i] + mlx90640ToP1[i];
+//            mImages[i] = mlx90640ImageP0[i] + mlx90640ImageP1[i];
+//
+//
+//            if (i <= (thermalBottom + 1) * width) { //脖子以上区域
+//                if ((i > (thermalTop + 1) * width) && ((i - thermalLeft) % width >= 0) && (i - thermalLeft) % width < (thermalRight - thermalLeft)) {    //脸部区域
+////                    mTemperature[i] = 50;
+//                    if (max < mTemperature[i]) {
+//                        max = mTemperature[i];
+//                    }
+//                    if (mTemperature[i] > min) {    //求最大的五个温度值
+//                        max5[index] = mTemperature[i];
+//                        min = mTemperature[i];
+//                        for (int j = 0; j < 2; j++) {
+//                            if (min > max5[j]) {
+//                                min = max5[j];
+//                                index = j;
+//                            }
+//                        }
+//                    }
+//                    if (mTemperature[i] >= 32 && mTemperature[i] <= 41) {
+//                        faceCount++;
+//                    }
+//
+//                } else if (mTemperature[i] >= 30) {
+//                    backgroundCount++;
+//                }
+//            }
+//
+//            if ((i >= thermalTop * width) && (i < (thermalBottom + 1) * width) &&
+//                    (((i > thermalTop * width + thermalLeft) && (i <= thermalTop * width + thermalRight)) ||
+//                            ((i > thermalBottom * width + thermalLeft) && (i <= thermalBottom * width + thermalRight)) ||
+//                            ((i - thermalLeft) % width == 0) || ((i - thermalRight) % width == 0))) {
+//                mTemperature[i] = 20;
+//            }
+//        }
+//        float sum = 0;
+//        for (int j = 0; j < 2; j++) {
+//            sum += max5[j];
+//        }
+//        faceTemperature = sum/2;
+//        System.out.println(Arrays.toString(mTemperature));
+//        System.out.println(Arrays.toString(mImages));
+//        if (ret == 0) {
+//            sendMessage(Constant.THERMAL);
+//            mTvTemperature.setText("当前温度：" + Utils.t1f(max) + "度");
+//            mGridView.setTemperature(mTemperature, mImages);
+//        } else {
+//            mTvTemperature.setText("MLX90640数据读取错误");
+//            Toast.makeText(this, "MLX90640数据读取错误", Toast.LENGTH_LONG).show();
+//        }
+//        float f = (float) faceCount / faceArea;
+//        float b = (float) backgroundCount / backgroundArea;
+//        Logger.i(TAG, "人脸：" + faceArea + "背景：" + backgroundArea + "人脸正常像素：" + faceCount + "比例：" + f + "背景异常像素：" + backgroundCount + "比例：" + b);
+//        return (float) faceCount / faceArea > 0.4;
+//    }
+
+//    private void mlx90640Measure() {
+//        int ret = AttendanceApplication.MLX90640.MLX90640_Measure(mlx90640ImageP0, mlx90640ImageP1, mlx90640ToP0, mlx90640ToP1);
+//
+//        float max = Float.MIN_VALUE;
+//        for (int i = 0; i < 768; ++i) {
+//            ;
+//
+//            mTemperature[i] = mlx90640ToP0[i] + mlx90640ToP1[i];
+//            mImages[i] = mlx90640ImageP0[i] + mlx90640ImageP1[i];
 //            if (max < mTemperature[i]) {
 //                max = mTemperature[i];
 //            }
-
-
-            if (i <= (thermalBottom + 1) * width) { //脖子以上区域
-                if ((i > (thermalTop + 1) * width) && ((i - thermalLeft) % width >= 0) && (i - thermalRight) % width < (thermalRight - thermalLeft)) {    //脸部区域
-                    if (mTemperature[i] > min) {    //求最大的五个温度值
-                        max5[index] = mTemperature[i];
-                        min = mTemperature[i];
-                        for (int j = 0; j < 2; j++) {
-                            if (min > max5[j]) {
-                                min = max5[j];
-                                index = j;
-                            }
-                        }
-                    }
-                    if (mTemperature[i] >= 26 && mTemperature[i] <= 41) {
-                        faceCount++;
-                    }
-
-                } else if (mTemperature[i] >= 30) {
-                    backgroundCount++;
-                }
-            }
-
-            if ((i >= thermalTop * width) && (i < (thermalBottom + 1) * width) &&
-                    (((i > thermalTop * width + thermalLeft) && (i <= thermalTop * width + thermalRight)) ||
-                            ((i > thermalBottom * width + thermalLeft) && (i <= thermalBottom * width + thermalRight)) ||
-                            ((i - thermalLeft) % width == 0) || ((i - thermalRight) % width == 0))) {
-                mTemperature[i] = 50;
-            }
-        }
-        float sum = 0;
-        for (int j = 0; j < 2; j++) {
-            sum += max5[j];
-        }
-        faceTemperature = sum/2;
-        System.out.println(Arrays.toString(mTemperature));
-        System.out.println(Arrays.toString(mImages));
-        if (ret == 0) {
-            sendMessage(Constant.THERMAL);
+//        }
+//        System.out.println(Arrays.toString(mTemperature));
+//        System.out.println(Arrays.toString(mImages));
+//        if (ret == 0) {
 //            mTvTemperature.setText("当前温度：" + Utils.t1f(max) + "度");
 //            mGridView.setTemperature(mTemperature, mImages);
-        } else {
+//        } else {
 //            mTvTemperature.setText("MLX90640数据读取错误");
-            Toast.makeText(this, "MLX90640数据读取错误", Toast.LENGTH_LONG).show();
-        }
-        float f = (float) faceCount / faceArea;
-        float b = (float) backgroundCount / backgroundArea;
-        Logger.i(TAG, "人脸：" + faceArea + "背景：" + backgroundArea + "人脸正常像素：" + faceCount + "比例：" + f + "背景异常像素：" + backgroundCount + "比例：" + b);
-        return (float) faceCount / faceArea > 0.6;
-    }
+//            Toast.makeText(this, "MLX90640数据读取错误", Toast.LENGTH_LONG).show();
+//        }
+//    }
 
     /*
     人脸匹配成功，添加记录
      */
     private class FDHttpThread implements Runnable {
-        String name, phoneNum;
+        String name, phoneNum, faceBase64;
 
-        FDHttpThread(String phoneNum, String name) {
+        FDHttpThread(String phoneNum, String name, String faceBase64) {
             this.phoneNum = phoneNum;
             this.name = name;
+            this.faceBase64 = faceBase64;
         }
 
         @Override
@@ -573,6 +659,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                 requestBody.put("service", "door.attendance.enter");
                 requestBody.put("phoneNum", phoneNum);
                 requestBody.put("name", name);
+                requestBody.put("faceBase64", faceBase64);
                 requestBody.put("community", "凤凰城");
                 requestBody.put("building", "05");
                 requestBody.put("method", "face");
@@ -672,19 +759,12 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         showHandler.sendMessage(msg);
     }
 
-    float faceTemperature;
+    //    float faceTemperature;
+//    float max;
     private Handler showHandler = new Handler() {
         public void handleMessage(Message msg) {
             Bundle data;
             switch (msg.what) {
-                case Constant.UPDATE_FACE:
-//                    Glide.with(Main3Activity.this).load(face).into(ivFace);
-                    ivFace.setImageBitmap(face);
-                    break;
-                case Constant.CLOSE_FACE:
-                    ivFace.setImageBitmap(null);
-//                    tvResult.setText("");
-                    break;
                 case Constant.UNKNOWN:
                     data = msg.getData();
                     tvResult.setText("未知人员");
@@ -703,9 +783,9 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                 case Constant.FAKE_FACE:
                     tvResult.setText("疑似假脸");
                     break;
-                case Constant.THERMAL:
-                    mTvTemperature.setText("当前温度：" + Utils.t1f(faceTemperature) + "度");
-                    mGridView.setTemperature(mTemperature, mImages);
+                case Constant.CLEAN_EXPRESSION_AND_TEMPERATURE:
+                    tvExpression.setText("");
+                    tvTemperature.setText("");
                     break;
             }
         }
@@ -721,34 +801,34 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
     /**
      * 人脸马赛克化
      */
-    private Bitmap encryptBitmap(Bitmap src) {
-        int w = src.getWidth();
-        int h = src.getHeight();
-        int[] pix = new int[w * h];
-        src.getPixels(pix, 0, w, 0, 0, w, h);
-        int[] newPix = new int[w * h];
-        int blockSize = 20;
-        for (int y = 0; y < h / blockSize; y++) {
-            for (int x = 0; x < w / blockSize; x++) {
-                for (int j = 0; j < blockSize / 2; j++) {
-                    for (int i = 0; i < blockSize; i++) {
-                        if (i < blockSize / 2) {
-                            int index1 = (y * blockSize + j) * w + i + x * blockSize;
-                            int index2 = index1 + (w + 1) * blockSize / 2;
-                            newPix[index1] = pix[index2];
-                            newPix[index2] = pix[index1];
-                        } else {
-                            int index1 = (y * blockSize + j) * w + i + x * blockSize;
-                            int index2 = index1 + (w - 1) * blockSize / 2;
-                            newPix[index1] = pix[index2];
-                            newPix[index2] = pix[index1];
-                        }
-                    }
-                }
-            }
-        }
-        Bitmap res = Bitmap.createBitmap(w, h, src.getConfig());
-        res.setPixels(newPix, 0, w, 0, 0, w, h);
-        return res;
-    }
+//    private Bitmap encryptBitmap(Bitmap src) {
+//        int w = src.getWidth();
+//        int h = src.getHeight();
+//        int[] pix = new int[w * h];
+//        src.getPixels(pix, 0, w, 0, 0, w, h);
+//        int[] newPix = new int[w * h];
+//        int blockSize = 20;
+//        for (int y = 0; y < h / blockSize; y++) {
+//            for (int x = 0; x < w / blockSize; x++) {
+//                for (int j = 0; j < blockSize / 2; j++) {
+//                    for (int i = 0; i < blockSize; i++) {
+//                        if (i < blockSize / 2) {
+//                            int index1 = (y * blockSize + j) * w + i + x * blockSize;
+//                            int index2 = index1 + (w + 1) * blockSize / 2;
+//                            newPix[index1] = pix[index2];
+//                            newPix[index2] = pix[index1];
+//                        } else {
+//                            int index1 = (y * blockSize + j) * w + i + x * blockSize;
+//                            int index2 = index1 + (w - 1) * blockSize / 2;
+//                            newPix[index1] = pix[index2];
+//                            newPix[index2] = pix[index1];
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        Bitmap res = Bitmap.createBitmap(w, h, src.getConfig());
+//        res.setPixels(newPix, 0, w, 0, 0, w, h);
+//        return res;
+//    }
 }

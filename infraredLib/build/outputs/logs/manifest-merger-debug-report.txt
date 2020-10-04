@@ -1,23 +1,31 @@
 -- Merging decision tree log ---
 manifest
-ADDED from F:\project\AS\IrMeterSDK\grade\infraredLib\src\main\AndroidManifest.xml:1:1-2:41
-INJECTED from F:\project\AS\IrMeterSDK\grade\infraredLib\src\main\AndroidManifest.xml:1:1-2:41
-INJECTED from F:\project\AS\IrMeterSDK\grade\infraredLib\src\main\AndroidManifest.xml:1:1-2:41
-INJECTED from F:\project\AS\IrMeterSDK\grade\infraredLib\src\main\AndroidManifest.xml:1:1-2:41
-INJECTED from F:\project\AS\IrMeterSDK\grade\infraredLib\src\main\AndroidManifest.xml:1:1-2:41
-INJECTED from F:\project\AS\IrMeterSDK\grade\infraredLib\src\main\AndroidManifest.xml:1:1-2:41
-INJECTED from F:\project\AS\IrMeterSDK\grade\infraredLib\src\main\AndroidManifest.xml:1:1-2:41
+ADDED from F:\project\AS\Attendance\infraredLib\src\main\AndroidManifest.xml:1:1-2:41
+INJECTED from F:\project\AS\Attendance\infraredLib\src\main\AndroidManifest.xml:1:1-2:41
+INJECTED from F:\project\AS\Attendance\infraredLib\src\main\AndroidManifest.xml:1:1-2:41
+INJECTED from F:\project\AS\Attendance\infraredLib\src\main\AndroidManifest.xml:1:1-2:41
+INJECTED from F:\project\AS\Attendance\infraredLib\src\main\AndroidManifest.xml:1:1-2:41
+INJECTED from F:\project\AS\Attendance\infraredLib\src\main\AndroidManifest.xml:1:1-2:41
+INJECTED from F:\project\AS\Attendance\infraredLib\src\main\AndroidManifest.xml:1:1-2:41
 	package
-		ADDED from F:\project\AS\IrMeterSDK\grade\infraredLib\src\main\AndroidManifest.xml:2:5-38
-		INJECTED from F:\project\AS\IrMeterSDK\grade\infraredLib\src\main\AndroidManifest.xml
-		INJECTED from F:\project\AS\IrMeterSDK\grade\infraredLib\src\main\AndroidManifest.xml
+		ADDED from F:\project\AS\Attendance\infraredLib\src\main\AndroidManifest.xml:2:5-38
+		INJECTED from F:\project\AS\Attendance\infraredLib\src\main\AndroidManifest.xml
+		INJECTED from F:\project\AS\Attendance\infraredLib\src\main\AndroidManifest.xml
 	android:versionName
-		INJECTED from F:\project\AS\IrMeterSDK\grade\infraredLib\src\main\AndroidManifest.xml
-		ADDED from F:\project\AS\IrMeterSDK\grade\infraredLib\src\main\AndroidManifest.xml:1:1-2:41
-		INJECTED from F:\project\AS\IrMeterSDK\grade\infraredLib\src\main\AndroidManifest.xml
+		INJECTED from F:\project\AS\Attendance\infraredLib\src\main\AndroidManifest.xml
+		ADDED from F:\project\AS\Attendance\infraredLib\src\main\AndroidManifest.xml:1:1-2:41
+		INJECTED from F:\project\AS\Attendance\infraredLib\src\main\AndroidManifest.xml
 	android:versionCode
-		INJECTED from F:\project\AS\IrMeterSDK\grade\infraredLib\src\main\AndroidManifest.xml
-		ADDED from F:\project\AS\IrMeterSDK\grade\infraredLib\src\main\AndroidManifest.xml:1:1-2:41
-		INJECTED from F:\project\AS\IrMeterSDK\grade\infraredLib\src\main\AndroidManifest.xml
+		INJECTED from F:\project\AS\Attendance\infraredLib\src\main\AndroidManifest.xml
+		ADDED from F:\project\AS\Attendance\infraredLib\src\main\AndroidManifest.xml:1:1-2:41
+		INJECTED from F:\project\AS\Attendance\infraredLib\src\main\AndroidManifest.xml
 	xmlns:android
-		ADDED from F:\project\AS\IrMeterSDK\grade\infraredLib\src\main\AndroidManifest.xml:1:11-69
+		ADDED from F:\project\AS\Attendance\infraredLib\src\main\AndroidManifest.xml:1:11-69
+uses-sdk
+INJECTED from F:\project\AS\Attendance\infraredLib\src\main\AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from F:\project\AS\Attendance\infraredLib\src\main\AndroidManifest.xml
+INJECTED from F:\project\AS\Attendance\infraredLib\src\main\AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from F:\project\AS\Attendance\infraredLib\src\main\AndroidManifest.xml
+		ADDED from F:\project\AS\Attendance\infraredLib\src\main\AndroidManifest.xml
+		INJECTED from F:\project\AS\Attendance\infraredLib\src\main\AndroidManifest.xml

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/downloadDb"
+        android:icon="@drawable/ic_gengxing"
+        android:title="更新数据库"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/encrypt"
+        android:icon="@drawable/ic_jiami"
+        app:showAsAction="ifRoom"/>
+</menu>

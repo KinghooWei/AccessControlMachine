@@ -39,7 +39,7 @@ public class FaceDatabase {
 
     public FaceDatabase(Context context) {
 //        share = context.getSharedPreferences("attendance",Context.MODE_PRIVATE);
-        shpUtil = new SharedPreferencesUtil(context);
+        shpUtil = new SharedPreferencesUtil();
         // 更新日志的路径
         File sdDir = Environment.getExternalStorageDirectory();//get directory
         logDir = sdDir.toString() + "/attendance/";

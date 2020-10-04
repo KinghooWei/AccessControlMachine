@@ -2,4 +2,9 @@
 2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
 3    package="com.lztek.tools.irmeter"
 4    android:versionCode="1"
-5    android:versionName="1.0.1.20200226" />
+5    android:versionName="1.0.1.20200226" >
+6
+7    <uses-sdk android:minSdkVersion="1" />
+7-->F:\project\AS\Attendance\infraredLib\src\main\AndroidManifest.xml
+8
+9</manifest>
