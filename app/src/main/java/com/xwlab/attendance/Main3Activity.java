@@ -43,6 +43,7 @@ import com.xwlab.attendance.ui.DetectedViewModel;
 import com.xwlab.expression.ExpresionRegcognition;
 import com.xwlab.util.CodeHints;
 import com.xwlab.util.Constant;
+import com.xwlab.util.SharedPreferencesUtil;
 import com.xwlab.widget.Camera2View;
 import com.xwlab.widget.FaceView;
 import com.xwlab.widget.MLXGridView;
@@ -72,14 +73,16 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
     protected MLXGridView mGridView;
     private FloatingActionButton fabSwitch;
 
+    String community;
+    String gate;
+    float longitude;
+    float latitude;
+
     private String password = "", showText = "";
     private boolean encryption = true;     //1表示开启加密模式
-    private Bitmap face;
     private Uri ringtoneUri = Uri.parse("android.resource://" + R.raw.beep);
     private Ringtone ringtone;
     private boolean isRealFace = false;
-
-//    protected MLX906xx mMLX90640;
 
     Button btnEncrypt;
     private DetectedViewModel viewModel;
@@ -265,6 +268,11 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                 isRealFace = realFace;
             }
         });
+
+        community = SharedPreferencesUtil.get().loadString("community");
+        gate = SharedPreferencesUtil.get().loadString("gate");
+        longitude = SharedPreferencesUtil.get().loadFloat("longitude");
+        latitude = SharedPreferencesUtil.get().loadFloat("latitude");
     }
 
 
@@ -386,16 +394,16 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                     int maxWidth=0;
                     int j = 0;
                     for (int i = 0;i<num;i++){
-                        int w = faceInfo[5*i+3] -faceInfo[5*i+1];
+                        int w = faceInfo[14*i+3] -faceInfo[14*i+1];
                         if(w>maxWidth){
                             maxWidth=w;
                             j=i;
                         }
                     }
-                    int left = faceInfo[5*j+1];
-                    int top = faceInfo[5*j+2];
-                    int right = faceInfo[5*j+3];
-                    int bottom = faceInfo[5*j+4];
+                    int left = faceInfo[14*j+1];
+                    int top = faceInfo[14*j+2];
+                    int right = faceInfo[14*j+3];
+                    int bottom = faceInfo[14*j+4];
                     Rect rect = new Rect(left, top, right, bottom);
                     //温度检测
                     if (System.currentTimeMillis() - temperatureTime > 1000) {
@@ -660,9 +668,11 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                 requestBody.put("phoneNum", phoneNum);
                 requestBody.put("name", name);
                 requestBody.put("faceBase64", faceBase64);
-                requestBody.put("community", "凤凰城");
-                requestBody.put("building", "05");
+                requestBody.put("community", community);
+                requestBody.put("building", gate);
                 requestBody.put("method", "face");
+                requestBody.put("longitude",longitude);
+                requestBody.put("latitude",latitude);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -695,9 +705,11 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
             try {
                 requestBody.put("service", "door.attendance.QRCode");
                 requestBody.put("phoneNum", phoneNum);
-                requestBody.put("community", "凤凰城");
-                requestBody.put("building", "05");
+                requestBody.put("community", community);
+                requestBody.put("building", gate);
                 requestBody.put("QRCode", QRCode);
+                requestBody.put("longitude",longitude);
+                requestBody.put("latitude",latitude);
             } catch (JSONException e) {
                 e.printStackTrace();
             }

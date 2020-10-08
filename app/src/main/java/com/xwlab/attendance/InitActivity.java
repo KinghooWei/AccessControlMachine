@@ -21,6 +21,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 
+import com.xwlab.attendance.logic.model.Coordinates;
 import com.xwlab.util.PermissionUtil;
 import com.xwlab.util.SharedPreferencesUtil;
 
@@ -72,14 +73,14 @@ public class InitActivity extends AppCompatActivity implements AdapterView.OnIte
         initCity();
         initCommunity();
         initGate();
-        btnOK = (Button) findViewById(R.id.btn_ok);
+        btnOK = findViewById(R.id.btn_ok);
         btnOK.setOnClickListener(this);
     }
 
     private void initProvince() {
         ArrayAdapter<String> provinceAdapter = new ArrayAdapter<>(this, R.layout.item_select, provinceArray);
         provinceAdapter.setDropDownViewResource(R.layout.item_dropdown);
-        spProvince = (Spinner) findViewById(R.id.sp_province);
+        spProvince = findViewById(R.id.sp_province);
         spProvince.setAdapter(provinceAdapter);
         spProvince.setSelection(0);
         spProvince.setOnItemSelectedListener(this);
@@ -88,7 +89,7 @@ public class InitActivity extends AppCompatActivity implements AdapterView.OnIte
     private void initCity() {
         ArrayAdapter<String> cityAdapter = new ArrayAdapter<>(this, R.layout.item_select, cityArray);
         cityAdapter.setDropDownViewResource(R.layout.item_dropdown);
-        spCity = (Spinner) findViewById(R.id.sp_city);
+        spCity = findViewById(R.id.sp_city);
         spCity.setAdapter(cityAdapter);
         spCity.setSelection(0);
         spCity.setOnItemSelectedListener(this);
@@ -97,7 +98,7 @@ public class InitActivity extends AppCompatActivity implements AdapterView.OnIte
     private void initCommunity() {
         ArrayAdapter<String> communityAdapter = new ArrayAdapter<>(this, R.layout.item_select, communityArray);
         communityAdapter.setDropDownViewResource(R.layout.item_dropdown);
-        spCommunity = (Spinner) findViewById(R.id.sp_community);
+        spCommunity = findViewById(R.id.sp_community);
         spCommunity.setAdapter(communityAdapter);
         spCommunity.setSelection(0);
         spCommunity.setOnItemSelectedListener(this);
@@ -106,7 +107,7 @@ public class InitActivity extends AppCompatActivity implements AdapterView.OnIte
     private void initGate() {
         ArrayAdapter<String> gateAdapter = new ArrayAdapter<>(this, R.layout.item_select, gateArray);
         gateAdapter.setDropDownViewResource(R.layout.item_dropdown);
-        spGate = (Spinner) findViewById(R.id.sp_gate);
+        spGate = findViewById(R.id.sp_gate);
         spGate.setAdapter(gateAdapter);
         spGate.setSelection(0);
         spGate.setOnItemSelectedListener(this);
@@ -346,9 +347,25 @@ public class InitActivity extends AppCompatActivity implements AdapterView.OnIte
             shareUtil.saveBoolean("hasAddress", true);
             shareUtil.saveString("community", community);
             shareUtil.saveString("gate", gate);
-            Intent intent = new Intent(this, Main3Activity.class);
-            startActivity(intent);
+            Coordinates coordinates = getCoordinates(community,gate);
+            shareUtil.saveFloat("longitude",coordinates.getLongitude());
+            shareUtil.saveFloat("latitude",coordinates.getLatitude());
+//            Intent intent = new Intent(this, Main3Activity.class);
+//            startActivity(intent);
+            initWork();
         }
+    }
+
+    private Coordinates getCoordinates(String community,String gate){
+        switch (community) {
+            case "豪利花园":
+                switch (gate) {
+                    case "南门":
+                        return new Coordinates(113.34664f,23.15318f);
+                }
+            break;
+        }
+        return new Coordinates(0,0);
     }
 
     private void copyBigDataToSD(String strOutFileName) throws IOException {
