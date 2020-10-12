@@ -350,9 +350,9 @@ public class InitActivity extends AppCompatActivity implements AdapterView.OnIte
             Coordinates coordinates = getCoordinates(community,gate);
             shareUtil.saveFloat("longitude",coordinates.getLongitude());
             shareUtil.saveFloat("latitude",coordinates.getLatitude());
-//            Intent intent = new Intent(this, Main3Activity.class);
-//            startActivity(intent);
-            initWork();
+            Intent intent = new Intent(this, Main3Activity.class);
+            startActivity(intent);
+//            initWork();
         }
     }
 

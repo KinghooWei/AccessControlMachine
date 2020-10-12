@@ -17,6 +17,8 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
+import com.xwlab.attendance.logic.model.EncryptFace;
+
 import java.util.Arrays;
 import java.util.Random;
 
@@ -118,11 +120,11 @@ public class FaceView extends View {
         mHandler.sendEmptyMessage(0);
     }
 
-    public Bitmap encryptFace(Bitmap face) {
+    public EncryptFace encryptFace(Bitmap face) {
 
         double key = keyValue(face);          					// 密钥值
         // 加密
-        return processBitmap(face, key);
+        return new EncryptFace(processBitmap(face, key),String.valueOf(key));
     }
 
     public void showEncryptFace(Bitmap face, Rect rect) {

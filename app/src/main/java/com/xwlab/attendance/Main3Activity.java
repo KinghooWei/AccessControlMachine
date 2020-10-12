@@ -38,6 +38,7 @@ import com.google.zxing.Result;
 import com.google.zxing.common.GlobalHistogramBinarizer;
 import com.google.zxing.qrcode.QRCodeReader;
 import com.lztek.tools.irmeter.MLX906xx;
+import com.xwlab.attendance.logic.model.EncryptFace;
 import com.xwlab.attendance.logic.model.TemperatureInfo;
 import com.xwlab.attendance.ui.DetectedViewModel;
 import com.xwlab.expression.ExpresionRegcognition;
@@ -170,7 +171,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                 tvResult.setText("正在更新数据库...");
                 mFaceDatabase.updateDatabase();
                 tvResult.setText("数据库更新完毕");
-                sendMessageDelayed(Constant.CLEAN_TEXT,1000);
+                sendMessageDelayed(Constant.CLEAN_TEXT, 1000);
                 break;
             case R.id.encrypt:
                 if (!encryption) {
@@ -391,19 +392,19 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
 
                     startTime = System.currentTimeMillis();
                     //截取最大的人脸
-                    int maxWidth=0;
+                    int maxWidth = 0;
                     int j = 0;
-                    for (int i = 0;i<num;i++){
-                        int w = faceInfo[14*i+3] -faceInfo[14*i+1];
-                        if(w>maxWidth){
-                            maxWidth=w;
-                            j=i;
+                    for (int i = 0; i < num; i++) {
+                        int w = faceInfo[14 * i + 3] - faceInfo[14 * i + 1];
+                        if (w > maxWidth) {
+                            maxWidth = w;
+                            j = i;
                         }
                     }
-                    int left = faceInfo[14*j+1];
-                    int top = faceInfo[14*j+2];
-                    int right = faceInfo[14*j+3];
-                    int bottom = faceInfo[14*j+4];
+                    int left = faceInfo[14 * j + 1];
+                    int top = faceInfo[14 * j + 2];
+                    int right = faceInfo[14 * j + 3];
+                    int bottom = faceInfo[14 * j + 4];
                     Rect rect = new Rect(left, top, right, bottom);
                     //温度检测
                     if (System.currentTimeMillis() - temperatureTime > 1000) {
@@ -415,7 +416,9 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                     startTime = System.currentTimeMillis();
                     //加密或者画矩形框
                     faceRect = Bitmap.createBitmap(face, left, top, right - left, bottom - top);
-                    Bitmap faceEncrypt = fvFace.encryptFace(faceRect);
+                    EncryptFace encryptFace = fvFace.encryptFace(faceRect);
+                    Bitmap faceEncrypt = encryptFace.getEncryptFace();
+                    String key = encryptFace.getKey();
                     if (encryption) {
                         fvFace.showEncryptFace(faceEncrypt, rect);
                     } else {
@@ -442,12 +445,12 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                                 long interval = System.currentTimeMillis() - time;
                                 if (interval > 5000) {
                                     String faceBase64 = Utils.bitmapToBase64(faceEncrypt);
-                                    new Thread(new FDHttpThread(phoneNum, name, faceBase64)).start();
+                                    new Thread(new FDHttpThread(phoneNum, name, faceBase64, key)).start();
                                 }
                             } else {            //与上一位识别的人不相同
                                 lastFacePhoneNum = phoneNum;
                                 String faceBase64 = Utils.bitmapToBase64(faceEncrypt);
-                                new Thread(new FDHttpThread(phoneNum, name, faceBase64)).start();
+                                new Thread(new FDHttpThread(phoneNum, name, faceBase64, key)).start();
                             }
                         } else {
                             sendMessage(Constant.FAKE_FACE);
@@ -651,12 +654,13 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
     人脸匹配成功，添加记录
      */
     private class FDHttpThread implements Runnable {
-        String name, phoneNum, faceBase64;
+        String name, phoneNum, faceBase64, key;
 
-        FDHttpThread(String phoneNum, String name, String faceBase64) {
+        FDHttpThread(String phoneNum, String name, String faceBase64, String key) {
             this.phoneNum = phoneNum;
             this.name = name;
             this.faceBase64 = faceBase64;
+            this.key = key;
         }
 
         @Override
@@ -668,11 +672,12 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                 requestBody.put("phoneNum", phoneNum);
                 requestBody.put("name", name);
                 requestBody.put("faceBase64", faceBase64);
+                requestBody.put("key", key);
                 requestBody.put("community", community);
                 requestBody.put("building", gate);
                 requestBody.put("method", "face");
-                requestBody.put("longitude",longitude);
-                requestBody.put("latitude",latitude);
+                requestBody.put("longitude", longitude);
+                requestBody.put("latitude", latitude);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -708,8 +713,8 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                 requestBody.put("community", community);
                 requestBody.put("building", gate);
                 requestBody.put("QRCode", QRCode);
-                requestBody.put("longitude",longitude);
-                requestBody.put("latitude",latitude);
+                requestBody.put("longitude", longitude);
+                requestBody.put("latitude", latitude);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
