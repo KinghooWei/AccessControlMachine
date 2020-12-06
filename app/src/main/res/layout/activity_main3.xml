@@ -47,9 +47,8 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraintLayout2"
-            android:layout_width="520dp"
-            android:layout_height="300dp"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_width="468dp"
+            android:layout_height="270dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -81,13 +80,11 @@
 
         <com.xwlab.widget.MLXGridView
             android:id="@+id/grid24x32view"
-            android:layout_width="520dp"
-            android:layout_height="390dp"
+            android:layout_width="360dp"
+            android:layout_height="270dp"
             android:layout_centerInParent="true"
-            android:layout_marginTop="16dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_expression" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/tv_temperature"
@@ -309,15 +306,17 @@
         android:layout_marginEnd="32dp"
         android:layout_marginBottom="32dp"
         android:src="@drawable/ic_keyboard"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/cl_keyboard"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:visibility="visible" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/cl_keyboard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#99FFFFFF"
-        android:visibility="gone"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -337,7 +336,7 @@
         <Button
             android:id="@+id/button1"
             style="@style/btn_pwd"
-            android:layout_height="100dp"
+            android:layout_height="80dp"
             android:text="1"
             app:layout_constraintEnd_toStartOf="@+id/button2"
             app:layout_constraintHorizontal_weight="1"
@@ -347,7 +346,7 @@
         <Button
             android:id="@+id/button2"
             style="@style/btn_pwd"
-            android:layout_height="100dp"
+            android:layout_height="80dp"
             android:text="2"
             app:layout_constraintEnd_toStartOf="@+id/button3"
             app:layout_constraintHorizontal_weight="1"
@@ -357,7 +356,7 @@
         <Button
             android:id="@+id/button3"
             style="@style/btn_pwd"
-            android:layout_height="100dp"
+            android:layout_height="80dp"
             android:text="3"
             app:layout_constraintEnd_toEndOf="@id/et_pwd"
             app:layout_constraintHorizontal_weight="1"
@@ -367,7 +366,7 @@
         <Button
             android:id="@+id/button4"
             style="@style/btn_pwd"
-            android:layout_height="100dp"
+            android:layout_height="80dp"
             android:text="4"
             app:layout_constraintEnd_toStartOf="@+id/button5"
             app:layout_constraintHorizontal_weight="1"
@@ -377,7 +376,7 @@
         <Button
             android:id="@+id/button5"
             style="@style/btn_pwd"
-            android:layout_height="100dp"
+            android:layout_height="80dp"
             android:text="5"
             app:layout_constraintEnd_toStartOf="@+id/button6"
             app:layout_constraintHorizontal_weight="1"
@@ -387,7 +386,7 @@
         <Button
             android:id="@+id/button6"
             style="@style/btn_pwd"
-            android:layout_height="100dp"
+            android:layout_height="80dp"
             android:text="6"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_weight="1"
@@ -397,7 +396,7 @@
         <Button
             android:id="@+id/button7"
             style="@style/btn_pwd"
-            android:layout_height="100dp"
+            android:layout_height="80dp"
             android:text="7"
             app:layout_constraintEnd_toStartOf="@+id/button8"
             app:layout_constraintHorizontal_weight="1"
@@ -407,7 +406,7 @@
         <Button
             android:id="@+id/button8"
             style="@style/btn_pwd"
-            android:layout_height="100dp"
+            android:layout_height="80dp"
             android:text="8"
             app:layout_constraintEnd_toStartOf="@+id/button9"
             app:layout_constraintHorizontal_weight="1"
@@ -417,7 +416,7 @@
         <Button
             android:id="@+id/button9"
             style="@style/btn_pwd"
-            android:layout_height="100dp"
+            android:layout_height="80dp"
             android:text="9"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_weight="1"
@@ -427,7 +426,7 @@
         <Button
             android:id="@+id/button0"
             style="@style/btn_pwd"
-            android:layout_height="100dp"
+            android:layout_height="80dp"
             android:text="0"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/button_cancel"
@@ -438,7 +437,7 @@
         <Button
             android:id="@+id/button_cancel"
             style="@style/btn_pwd"
-            android:layout_height="100dp"
+            android:layout_height="80dp"
             android:text="删除"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

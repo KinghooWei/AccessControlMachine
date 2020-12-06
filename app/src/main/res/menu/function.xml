@@ -8,6 +8,7 @@
         app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/encrypt"
-        android:icon="@drawable/ic_jiami"
+        android:icon="@drawable/ic_bujiami"
+        android:title="加/解密"
         app:showAsAction="ifRoom"/>
 </menu>

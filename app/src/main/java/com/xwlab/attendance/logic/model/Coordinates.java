@@ -1,19 +1,19 @@
 package com.xwlab.attendance.logic.model;
 
 public class Coordinates {
-    private float longitude;
-    private float latitude;
+    private String longitude;
+    private String latitude;
 
-    public Coordinates(float longitude,float latitude){
+    public Coordinates(String longitude,String latitude){
         this.longitude=longitude;
         this.latitude=latitude;
     }
 
-    public float getLongitude() {
+    public String getLongitude() {
         return longitude;
     }
 
-    public float getLatitude() {
+    public String getLatitude() {
         return latitude;
     }
 }

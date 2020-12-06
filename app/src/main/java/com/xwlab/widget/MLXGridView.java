@@ -98,16 +98,16 @@ public class MLXGridView extends View {
         if ((gray>=0) && (gray<=63)) {
             rgbone=0;
             rgbtwo=0;
-            rgbthree= Math.round((gray/64)*255);
+            rgbthree=Math.round((gray/64)*255);
 
 
         } else if ((gray>=64) && (gray<=127)){
             rgbone=0;
-            rgbtwo= Math.round((gray-64)/64*255);
-            rgbthree= Math.round((127-gray)/64*255);
+            rgbtwo=Math.round((gray-64)/64*255);
+            rgbthree=Math.round((127-gray)/64*255);
 
         } else if ((gray>=128) && (gray<=191)){
-            rgbone= Math.round((gray-128)/64*255);
+            rgbone=Math.round((gray-128)/64*255);
             rgbtwo=255;
             rgbthree=0;
 
@@ -270,11 +270,11 @@ public class MLXGridView extends View {
     public void setTemperature(float[] temperatures, float[] images) {
         if (null != temperatures && null != mTemp) {
             System.arraycopy(temperatures, 0, mTemp, 0,
-                    Math.min(mTemp.length, temperatures.length));
+                    mTemp.length < temperatures.length ? mTemp.length : temperatures.length);
         }
         if (null != images && null != mImages) {
             System.arraycopy(images, 0, mImages, 0,
-                    Math.min(mImages.length, images.length));
+                    mImages.length < images.length? mImages.length : images.length);
         }
         invalidate();
     }

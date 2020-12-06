@@ -136,6 +136,7 @@ public class FaceDatabase {
      */
     public Object[] featureCmp(String fstr) {
 //        Logger.i(TAG,fstr);
+
         Logger.i(TAG, Arrays.toString(features.get(0)));
         Object[] objects;
         String fs[] = fstr.split(",");

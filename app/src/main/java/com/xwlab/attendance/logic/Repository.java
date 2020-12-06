@@ -97,102 +97,102 @@ public class Repository {
 //        return expressionLiveData;
 //    }
 
-    public LiveData<TemperatureInfo> liveDetect(RelativeRect faceRect) {
-        float[] mlx90640ImageP0 = new float[768];
-        float[] mlx90640ImageP1 = new float[768];
-        float[] mlx90640ToP0 = new float[768];
-        float[] mlx90640ToP1 = new float[768];
-
-        float[] temperatures = new float[768];
-        float[] pixels = new float[768];
-        float relaLeft = faceRect.getRelativeLeft();
-        float relaTop = faceRect.getRelativeTop();
-        float relaRight = faceRect.getRelativeRight();
-        float relaBottom = faceRect.getRelativeBottom();
-        Logger.i("人脸坐标",faceRect.toString());
-        int width = 32;
-        int height = 24;
-        int thermalLeft = (int) (width * relaLeft);
-        int thermalRight = (int) (width * relaRight);
-        int thermalTop = (int) (height * relaTop);
-        int thermalBottom = (int) (height * relaBottom);
-        int w = thermalRight - thermalLeft;
-        int h = thermalBottom - thermalTop;
-
-        int faceArea = w * h;
-        int backgroundArea = (thermalBottom + 1) * width - faceArea;
-        int faceCount = 0;
-        int backgroundCount = 0;
-
-
-        int ret = AttendanceApplication.MLX90640.MLX90640_Measure(mlx90640ImageP0, mlx90640ImageP1, mlx90640ToP0, mlx90640ToP1);
-//        Logger.i(TAG, "温度图"+Arrays.toString(mTemperature));
-//        float[] max5 = new float[]{0, 0};
-//        float min = 0;
-//        int index = 0;
-        if (ret == 0) {
-            float faceTemperature = 0L;
-            for (int i = 0; i < 768; ++i) {
-                temperatures[i] = mlx90640ToP0[i] + mlx90640ToP1[i];
-                pixels[i] = mlx90640ImageP0[i] + mlx90640ImageP1[i];
-
-
-                if (i <= (thermalBottom + 1) * width) { //脖子以上区域
-                    if ((i > (thermalTop + 1) * width) && ((i - thermalLeft) % width >= 0) && (i - thermalLeft) % width < (thermalRight - thermalLeft)) {    //脸部区域
-//                    mTemperature[i] = 50;
-                        if (faceTemperature < temperatures[i]) {
-                            faceTemperature = temperatures[i];
-                        }
-//                    if (mTemperature[i] > min) {    //求最大的五个温度值
-//                        max5[index] = mTemperature[i];
-//                        min = mTemperature[i];
-//                        for (int j = 0; j < 2; j++) {
-//                            if (min > max5[j]) {
-//                                min = max5[j];
-//                                index = j;
-//                            }
-//                        }
-//                    }
-                        if (temperatures[i] >= 32 && temperatures[i] <= 41) {
-                            faceCount++;
-                        }
-
-                    } else if (temperatures[i] >= 30) {
-                        backgroundCount++;
-                    }
-                }
-
-                if ((i >= thermalTop * width) && (i < (thermalBottom + 1) * width) &&
-                        (((i > thermalTop * width + thermalLeft) && (i <= thermalTop * width + thermalRight)) ||
-                                ((i > thermalBottom * width + thermalLeft) && (i <= thermalBottom * width + thermalRight)) ||
-                                ((i - thermalLeft) % width == 0) || ((i - thermalRight) % width == 0))) {
-                    temperatures[i] = 20;
-                }
-            }
-//        float sum = 0;
-//        for (int j = 0; j < 2; j++) {
-//            sum += max5[j];
-//        }
-//        faceTemperature = sum/2;
-//        System.out.println(Arrays.toString(mTemperature));
-//        System.out.println(Arrays.toString(mImages));
+//    public LiveData<TemperatureInfo> liveDetect(RelativeRect faceRect) {
+//        float[] mlx90640ImageP0 = new float[768];
+//        float[] mlx90640ImageP1 = new float[768];
+//        float[] mlx90640ToP0 = new float[768];
+//        float[] mlx90640ToP1 = new float[768];
+//
+//        float[] temperatures = new float[768];
+//        float[] pixels = new float[768];
+//        float relaLeft = faceRect.getRelativeLeft();
+//        float relaTop = faceRect.getRelativeTop();
+//        float relaRight = faceRect.getRelativeRight();
+//        float relaBottom = faceRect.getRelativeBottom();
+//        Logger.i("人脸坐标",faceRect.toString());
+//        int width = 32;
+//        int height = 24;
+//        int thermalLeft = (int) (width * relaLeft);
+//        int thermalRight = (int) (width * relaRight);
+//        int thermalTop = (int) (height * relaTop);
+//        int thermalBottom = (int) (height * relaBottom);
+//        int w = thermalRight - thermalLeft;
+//        int h = thermalBottom - thermalTop;
+//
+//        int faceArea = w * h;
+//        int backgroundArea = (thermalBottom + 1) * width - faceArea;
+//        int faceCount = 0;
+//        int backgroundCount = 0;
+//
+//
+//        int ret = AttendanceApplication.MLX90640.MLX90640_Measure(mlx90640ImageP0, mlx90640ImageP1, mlx90640ToP0, mlx90640ToP1);
+////        Logger.i(TAG, "温度图"+Arrays.toString(mTemperature));
+////        float[] max5 = new float[]{0, 0};
+////        float min = 0;
+////        int index = 0;
 //        if (ret == 0) {
-//            sendMessage(Constant.THERMAL);
-//            mTvTemperature.setText("当前温度：" + Utils.t1f(max) + "度");
-//            mGridView.setTemperature(mTemperature, mImages);
+//            float faceTemperature = 0L;
+//            for (int i = 0; i < 768; ++i) {
+//                temperatures[i] = mlx90640ToP0[i] + mlx90640ToP1[i];
+//                pixels[i] = mlx90640ImageP0[i] + mlx90640ImageP1[i];
+//
+//
+//                if (i <= (thermalBottom + 1) * width) { //脖子以上区域
+//                    if ((i > (thermalTop + 1) * width) && ((i - thermalLeft) % width >= 0) && (i - thermalLeft) % width < (thermalRight - thermalLeft)) {    //脸部区域
+////                    mTemperature[i] = 50;
+//                        if (faceTemperature < temperatures[i]) {
+//                            faceTemperature = temperatures[i];
+//                        }
+////                    if (mTemperature[i] > min) {    //求最大的五个温度值
+////                        max5[index] = mTemperature[i];
+////                        min = mTemperature[i];
+////                        for (int j = 0; j < 2; j++) {
+////                            if (min > max5[j]) {
+////                                min = max5[j];
+////                                index = j;
+////                            }
+////                        }
+////                    }
+//                        if (temperatures[i] >= 32 && temperatures[i] <= 41) {
+//                            faceCount++;
+//                        }
+//
+//                    } else if (temperatures[i] >= 30) {
+//                        backgroundCount++;
+//                    }
+//                }
+//
+//                if ((i >= thermalTop * width) && (i < (thermalBottom + 1) * width) &&
+//                        (((i > thermalTop * width + thermalLeft) && (i <= thermalTop * width + thermalRight)) ||
+//                                ((i > thermalBottom * width + thermalLeft) && (i <= thermalBottom * width + thermalRight)) ||
+//                                ((i - thermalLeft) % width == 0) || ((i - thermalRight) % width == 0))) {
+//                    temperatures[i] = 20;
+//                }
+//            }
+////        float sum = 0;
+////        for (int j = 0; j < 2; j++) {
+////            sum += max5[j];
+////        }
+////        faceTemperature = sum/2;
+////        System.out.println(Arrays.toString(mTemperature));
+////        System.out.println(Arrays.toString(mImages));
+////        if (ret == 0) {
+////            sendMessage(Constant.THERMAL);
+////            mTvTemperature.setText("当前温度：" + Utils.t1f(max) + "度");
+////            mGridView.setTemperature(mTemperature, mImages);
+////        } else {
+////            mTvTemperature.setText("MLX90640数据读取错误");
+////            Toast.makeText(this, "MLX90640数据读取错误", Toast.LENGTH_LONG).show();
+////        }
+//            float f = (float) faceCount / faceArea;
+//            float b = (float) backgroundCount / backgroundArea;
+//            Logger.i(TAG, "人脸：" + faceArea + "背景：" + backgroundArea + "人脸正常像素：" + faceCount + "比例：" + f + "背景异常像素：" + backgroundCount + "比例：" + b);
+//            boolean isRealFace = (float) faceCount / faceArea > 0.4;
+//            TemperatureInfo temperatureInfo = new TemperatureInfo(temperatures, pixels, faceTemperature, isRealFace);
+//            return new MutableLiveData<>(temperatureInfo);
 //        } else {
-//            mTvTemperature.setText("MLX90640数据读取错误");
-//            Toast.makeText(this, "MLX90640数据读取错误", Toast.LENGTH_LONG).show();
+//            Utils.showToast("热成像模块数据读取错误");
+//            return null;
 //        }
-            float f = (float) faceCount / faceArea;
-            float b = (float) backgroundCount / backgroundArea;
-            Logger.i(TAG, "人脸：" + faceArea + "背景：" + backgroundArea + "人脸正常像素：" + faceCount + "比例：" + f + "背景异常像素：" + backgroundCount + "比例：" + b);
-            boolean isRealFace = (float) faceCount / faceArea > 0.4;
-            TemperatureInfo temperatureInfo = new TemperatureInfo(temperatures, pixels, faceTemperature, isRealFace);
-            return new MutableLiveData<>(temperatureInfo);
-        } else {
-            Utils.showToast("热成像模块数据读取错误");
-            return null;
-        }
-    }
+//    }
 }

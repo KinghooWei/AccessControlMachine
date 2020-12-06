@@ -13,18 +13,15 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
@@ -38,8 +35,8 @@ import com.google.zxing.Result;
 import com.google.zxing.common.GlobalHistogramBinarizer;
 import com.google.zxing.qrcode.QRCodeReader;
 import com.lztek.tools.irmeter.MLX906xx;
+import com.serialport.yzrfidAPI;
 import com.xwlab.attendance.logic.model.EncryptFace;
-import com.xwlab.attendance.logic.model.TemperatureInfo;
 import com.xwlab.attendance.ui.DetectedViewModel;
 import com.xwlab.expression.ExpresionRegcognition;
 import com.xwlab.util.CodeHints;
@@ -51,7 +48,6 @@ import com.xwlab.widget.MLXGridView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.opencv.android.OpenCVLoader;
 
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -64,6 +60,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
     private Face mFace = new Face();
     private FaceDatabase mFaceDatabase;
     private boolean workThreadFlag;
+    private boolean hasFaceChange=true;         //有无人脸切换
     private static File sdDir = Environment.getExternalStorageDirectory();
     private static final String sdPath = sdDir.toString() + "/attendance/";
 
@@ -76,17 +73,26 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
 
     String community;
     String gate;
-    float longitude;
-    float latitude;
+    String longitude;
+    String latitude;
 
     private String password = "", showText = "";
-    private boolean encryption = true;     //1表示开启加密模式
+    private boolean encryption = false;     //1表示开启加密模式
     private Uri ringtoneUri = Uri.parse("android.resource://" + R.raw.beep);
     private Ringtone ringtone;
-    private boolean isRealFace = false;
+
 
     Button btnEncrypt;
     private DetectedViewModel viewModel;
+
+    Handler handler;
+    //    Handler mHandler;
+    public yzrfidAPI myzrfidAPI = new yzrfidAPI();
+    static int nfd = 0;
+    static int nIsOpenCom = 0;
+    int nStatus = 0;
+
+    private MLX906xx mMLX90640;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,12 +109,23 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         mFaceDatabase = new FaceDatabase(getApplicationContext());
         mFaceDatabase.updateDatabase();
 
-//        mMLX90640 = new MLX906xx();
-        mlx90640InitializeCheck();
+        //测温模块初始化
+        mGridView.setModuleType(MLXGridView.MLX90640);
+        mMLX90640 = new MLX906xx();
+//        mlx90640InitializeCheck();
 
-        if (!OpenCVLoader.initDebug()) {
-            Log.d("opencv", "初始化失败");
+        //刷卡模块初始化
+        handler = new Handler();
+        rfInitComFun();
+        if (nIsOpenCom != 0) {
+            findCard();
         }
+
+//        mHandler = new Handler();
+//        onBtnAuto();
+//        if (!OpenCVLoader.initDebug()) {
+//            Log.d("opencv", "初始化失败");
+//        }
 
 //                cvPreview.open(CameraCharacteristics.LENS_FACING_BACK);//平板
         cvPreview.open(CameraCharacteristics.LENS_FACING_FRONT);//3288
@@ -126,6 +143,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
     protected void onStop() {
         super.onStop();
         workThreadFlag = false;
+        rfClosePortFun();
     }
 
 //    private Runnable mAutoRefreshRunnable = null;
@@ -198,20 +216,20 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
 
     protected int mlx90640InitializeCheck() {
 
-        int refreshRate = mRefreshRateValues[4];
+        int refreshRate = mRefreshRateValues[2];
 
-        if (refreshRate == AttendanceApplication.MLX90640.getRefreshRate()) {
+        if (refreshRate == mMLX90640.getRefreshRate()) {
             return refreshRate;
         }
 
-        int ret = AttendanceApplication.MLX90640.MLX90640_InitProcedure(refreshRate);
+        int ret = mMLX90640.MLX90640_InitProcedure(refreshRate);
         if (0 != ret) {
-            Toast.makeText(this, "MLX90640初始化失败", Toast.LENGTH_LONG).show();
+//            Toast.makeText(this, "MLX90640初始化失败", Toast.LENGTH_LONG).show();
 //            mTvTemperature.setText("MLX90640初始化失败！");
             return ret;
         } else {
 //            mTvTemperature.setText("MLX90640初始化成功!");
-            return AttendanceApplication.MLX90640.getRefreshRate();
+            return mMLX90640.getRefreshRate();
         }
     }
 
@@ -257,23 +275,20 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
 //        findViewById(R.id.btn_updateSQL).setOnClickListener(this);
 
         viewModel.expression.observe(this, expression -> tvExpression.setText(expression));
-        viewModel.temperatureInfoLiveData.observe(this, new Observer<TemperatureInfo>() {
-            @Override
-            public void onChanged(TemperatureInfo temperatureInfo) {
-                float[] temperatures = temperatureInfo.getTemperatures();
-                float[] pixels = temperatureInfo.getPixels();
-                float temperature = temperatureInfo.getFaceTemperature();
-                boolean realFace = temperatureInfo.isRealFace();
-                tvTemperature.setText("当前温度：" + Utils.t1f(temperature) + "度");
-                mGridView.setTemperature(temperatures, pixels);
-                isRealFace = realFace;
-            }
-        });
+//        viewModel.temperatureInfoLiveData.observe(this, temperatureInfo -> {
+//            float[] temperatures = temperatureInfo.getTemperatures();
+//            float[] pixels = temperatureInfo.getPixels();
+//            float temperature = temperatureInfo.getFaceTemperature();
+//            boolean realFace = temperatureInfo.isRealFace();
+//            tvTemperature.setText("当前温度：" + Utils.t1f(temperature) + "度");
+//            mGridView.setTemperature(temperatures, pixels);
+//            isRealFace = realFace;
+//        });
 
         community = SharedPreferencesUtil.get().loadString("community");
         gate = SharedPreferencesUtil.get().loadString("gate");
-        longitude = SharedPreferencesUtil.get().loadFloat("longitude");
-        latitude = SharedPreferencesUtil.get().loadFloat("latitude");
+        longitude = SharedPreferencesUtil.get().loadString("longitude");
+        latitude = SharedPreferencesUtil.get().loadString("latitude");
     }
 
 
@@ -354,6 +369,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         private Bitmap face;
         private Bitmap faceRect;
         private ExpresionRegcognition expresionRegcognition = new ExpresionRegcognition();
+        boolean isRealFace = false;
 //        boolean trueFace = false;
 
         @Override
@@ -381,9 +397,10 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                 startTime = System.currentTimeMillis();
                 int num = faceInfo[0];
                 if (num > 0) {     //画面中有人脸
+                    hasFaceChange=true;
                     Logger.i(TAG, "检测到人脸");
                     //表情识别
-                    long sysTime = new Date().getTime();
+//                    long sysTime = new Date().getTime();
                     if (System.currentTimeMillis() - expressionTime > 2000) {
                         expressionTime = System.currentTimeMillis();
                         viewModel.detectFaceEmotion(face);
@@ -407,9 +424,14 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                     int bottom = faceInfo[14 * j + 4];
                     Rect rect = new Rect(left, top, right, bottom);
                     //温度检测
+
                     if (System.currentTimeMillis() - temperatureTime > 1000) {
                         temperatureTime = System.currentTimeMillis();
-                        viewModel.liveDetect((float) left / width, (float) top / height, (float) right / width, (float) bottom / height);
+//                        viewModel.liveDetect((float) left / width, (float) top / height, (float) right / width, (float) bottom / height);
+                        if (mlx90640InitializeCheck() >= 0) {
+                            isRealFace = liveDetect((float) left / width, (float) top / height, (float) right / width, (float) bottom / height);
+                        }
+
                         Logger.i(TAG, "温度检测：" + (System.currentTimeMillis() - startTime));
                     }
 
@@ -418,7 +440,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                     faceRect = Bitmap.createBitmap(face, left, top, right - left, bottom - top);
                     EncryptFace encryptFace = fvFace.encryptFace(faceRect);
                     Bitmap faceEncrypt = encryptFace.getEncryptFace();
-                    String key = encryptFace.getKey();
+                    Double key = encryptFace.getKey();
                     if (encryption) {
                         fvFace.showEncryptFace(faceEncrypt, rect);
                     } else {
@@ -433,7 +455,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                     Logger.i(TAG, "特征提取：" + (System.currentTimeMillis() - startTime));
 
                     startTime = System.currentTimeMillis();
-                    Object[] objects = mFaceDatabase.featureCmp(feature);
+                    Object[] objects = mFaceDatabase.featureCmp(feature);   //数据库没内容时会报空指针错误
                     name = (String) objects[0];
                     phoneNum = (String) objects[1];
                     if (!TextUtils.isEmpty(phoneNum)) {     //匹配成功
@@ -445,11 +467,13 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                                 long interval = System.currentTimeMillis() - time;
                                 if (interval > 5000) {
                                     String faceBase64 = Utils.bitmapToBase64(faceEncrypt);
+                                    String originalFace = Utils.bitmapToBase64(faceRect);
                                     new Thread(new FDHttpThread(phoneNum, name, faceBase64, key)).start();
                                 }
                             } else {            //与上一位识别的人不相同
                                 lastFacePhoneNum = phoneNum;
                                 String faceBase64 = Utils.bitmapToBase64(faceEncrypt);
+                                String originalFace = Utils.bitmapToBase64(faceRect);
                                 new Thread(new FDHttpThread(phoneNum, name, faceBase64, key)).start();
                             }
                         } else {
@@ -501,6 +525,19 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                 } else {
                     fvFace.clearCanvas();
                     sendMessageDelayed(Constant.CLEAN_EXPRESSION_AND_TEMPERATURE, 1000);
+                    if (hasFaceChange&& mlx90640InitializeCheck() >= 0) {
+                        for (int i = 0; i < 768; ++i) {
+                            temperatures[i] = 0;
+                        }
+                        Message msg = showHandler.obtainMessage();
+                        msg.what = Constant.TEMPERATURE;
+                        Bundle data = new Bundle();
+                        data.putFloatArray("temperatures", temperatures);
+                        msg.setData(data);
+                        showHandler.sendMessage(msg);
+                    }
+                    hasFaceChange=false;
+
 //                    haveFace = false;
 //                    sendMessage(Constant.CLOSE_FACE);
 
@@ -654,9 +691,10 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
     人脸匹配成功，添加记录
      */
     private class FDHttpThread implements Runnable {
-        String name, phoneNum, faceBase64, key;
+        String name, phoneNum, faceBase64;
+        Double key;
 
-        FDHttpThread(String phoneNum, String name, String faceBase64, String key) {
+        FDHttpThread(String phoneNum, String name, String faceBase64, Double key) {
             this.phoneNum = phoneNum;
             this.name = name;
             this.faceBase64 = faceBase64;
@@ -804,6 +842,11 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                     tvExpression.setText("");
                     tvTemperature.setText("");
                     break;
+                case Constant.TEMPERATURE:
+                    data = msg.getData();
+                    tvTemperature.setText("当前温度：" + Utils.t1f(data.getFloat("faceTemperature")) + "度");
+                    mGridView.setTemperature(data.getFloatArray("temperatures"), data.getFloatArray("pixels"));
+                    break;
             }
         }
     };
@@ -848,4 +891,249 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
 //        res.setPixels(newPix, 0, w, 0, 0, w, h);
 //        return res;
 //    }
+
+    /**
+     * 测温
+     */
+    float[] mlx90640ImageP0 = new float[768];
+    float[] mlx90640ImageP1 = new float[768];
+    float[] mlx90640ToP0 = new float[768];
+    float[] mlx90640ToP1 = new float[768];
+
+    float[] temperatures = new float[768];
+    float[] pixels = new float[768];
+
+    public boolean liveDetect(float relaLeft, float relaTop, float relaRight, float relaBottom) {
+
+//        Logger.i("人脸坐标",faceRect.toString());
+        int width = 32;
+        int height = 24;
+        int thermalLeft = 0;
+        int thermalRight = 0;
+        if(relaLeft<0.4){}
+            thermalLeft = Math.max((int) (width * relaLeft) - 3, 0);
+            thermalRight = Math.max((int) (width * relaRight) - 3, 0);
+        if (relaLeft < 0.5) {
+            thermalLeft = Math.max((int) (width * relaLeft) - 2, 0);
+            thermalRight = Math.max((int) (width * relaRight) - 2, 0);
+        } else {
+            thermalLeft = Math.max((int) (width * relaLeft) - 1, 0);
+            thermalRight = Math.max((int) (width * relaRight) - 1, 0);
+        }
+
+        int thermalTop = (int) (height * relaTop);
+        int thermalBottom = (int) (height * relaBottom);
+        int w = thermalRight - thermalLeft;
+        int h = thermalBottom - thermalTop;
+
+        int faceArea = w * h;
+        int backgroundArea = (thermalBottom + 1) * width - faceArea;
+        int faceCount = 0;
+        int backgroundCount = 0;
+
+
+        long temperatureTime = System.currentTimeMillis();
+        int ret = mMLX90640.MLX90640_Measure(mlx90640ImageP0, mlx90640ImageP1, mlx90640ToP0, mlx90640ToP1);
+        Logger.i(TAG, "温度检测耗时：" + (System.currentTimeMillis() - temperatureTime));
+//        Logger.i(TAG, "温度图"+Arrays.toString(mTemperature));
+//        float[] max5 = new float[]{0, 0};
+//        float min = 0;
+//        int index = 0;
+        if (ret == 0) {
+            float faceTemperature = 0L;
+            for (int i = 0; i < 768; ++i) {
+                temperatures[i] = mlx90640ToP0[i] + mlx90640ToP1[i];
+                pixels[i] = mlx90640ImageP0[i] + mlx90640ImageP1[i];
+
+
+                if (i <= (thermalBottom + 1) * width) { //脖子以上区域
+                    if ((i > (thermalTop + 1) * width) && ((i - thermalLeft) % width >= 0) && (i - thermalLeft) % width < (thermalRight - thermalLeft)) {    //脸部区域
+//                    mTemperature[i] = 50;
+                        if (faceTemperature < temperatures[i]) {
+                            faceTemperature = temperatures[i];
+                        }
+//                    if (mTemperature[i] > min) {    //求最大的五个温度值
+//                        max5[index] = mTemperature[i];
+//                        min = mTemperature[i];
+//                        for (int j = 0; j < 2; j++) {
+//                            if (min > max5[j]) {
+//                                min = max5[j];
+//                                index = j;
+//                            }
+//                        }
+//                    }
+                        if (temperatures[i] >= 30 && temperatures[i] <= 41) {
+                            faceCount++;
+                        }
+
+                    } else if (temperatures[i] >= 30) {
+                        backgroundCount++;
+                    }
+                }
+
+                if ((i >= thermalTop * width) && (i < (thermalBottom + 1) * width) &&
+                        (((i > thermalTop * width + thermalLeft) && (i <= thermalTop * width + thermalRight)) ||
+                                ((i > thermalBottom * width + thermalLeft) && (i <= thermalBottom * width + thermalRight)) ||
+                                ((i - thermalLeft) % width == 0) || ((i - thermalRight) % width == 0))) {
+                    temperatures[i] = 50;
+                }
+            }
+//        float sum = 0;
+//        for (int j = 0; j < 2; j++) {
+//            sum += max5[j];
+//        }
+//        faceTemperature = sum/2;
+//        System.out.println(Arrays.toString(mTemperature));
+//        System.out.println(Arrays.toString(mImages));
+//        if (ret == 0) {
+//            sendMessage(Constant.THERMAL);
+//            mTvTemperature.setText("当前温度：" + Utils.t1f(max) + "度");
+//            mGridView.setTemperature(mTemperature, mImages);
+//        } else {
+//            mTvTemperature.setText("MLX90640数据读取错误");
+//            Toast.makeText(this, "MLX90640数据读取错误", Toast.LENGTH_LONG).show();
+//        }
+            float f = (float) faceCount / faceArea;
+            float b = (float) backgroundCount / backgroundArea;
+            Logger.i(TAG, "人脸：" + faceArea + "背景：" + backgroundArea + "人脸正常像素：" + faceCount + "比例：" + f + "背景异常像素：" + backgroundCount + "比例：" + b);
+            boolean isRealFace = (float) faceCount / faceArea > 0.4;
+//            TemperatureInfo temperatureInfo = new TemperatureInfo(temperatures, pixels, faceTemperature, isRealFace);
+
+            Message msg = showHandler.obtainMessage();
+            msg.what = Constant.TEMPERATURE;
+            Bundle data = new Bundle();
+            data.putFloatArray("temperatures", temperatures);
+            data.putFloatArray("pixels", pixels);
+            data.putFloat("faceTemperature", faceTemperature);
+            msg.setData(data);
+            showHandler.sendMessage(msg);
+
+            return isRealFace;
+        } else {
+            Logger.e(TAG, "热成像模块数据读取错误");
+            return false;
+        }
+    }
+
+//    float[] mTemperature = new float[768];
+//    float[] mImages = new float[768];
+//    private Runnable mAutoRefreshRunnable = null;
+//    private void onBtnAuto() {
+//        if (null == mAutoRefreshRunnable) {
+//            if (mlx90640InitializeCheck() < 0) {
+//                return;
+//            }
+//            mAutoRefreshRunnable = new Runnable() {
+//                @Override
+//                public void run() {
+//                    mlx90640Measure();
+//
+//                    mHandler.removeCallbacks(this);
+//                    mHandler.postDelayed(this, 500);
+//                }
+//            };
+//            mHandler.postDelayed(mAutoRefreshRunnable, 1000);
+//        } else {
+//            mHandler.removeCallbacks(mAutoRefreshRunnable);
+//            mAutoRefreshRunnable = null;
+//        }
+//    }
+//    protected void mlx90640Measure() {
+//        int ret = mMLX90640.MLX90640_Measure(mlx90640ImageP0, mlx90640ImageP1, mlx90640ToP0, mlx90640ToP1);
+//
+//        float max = Float.MIN_VALUE;
+//        for (int i = 0; i < 768; ++i) { ;
+//
+//            mTemperature[i] = mlx90640ToP0[i] + mlx90640ToP1[i];
+//            mImages[i] = mlx90640ImageP0[i] + mlx90640ImageP1[i];
+//            if (max < mTemperature[i]) {
+//                max = mTemperature[i];
+//            }
+//        }
+//        System.out.println(Arrays.toString(mTemperature));
+//        System.out.println(Arrays.toString(mImages));
+//        if (ret == 0) {
+//            tvTemperature.setText("当前温度：" + Utils.t1f(max) +"度");
+//            mGridView.setTemperature(mTemperature, mImages);
+//        } else {
+//            tvTemperature.setText("MLX90640数据读取错误");
+//            Toast.makeText(this, "MLX90640数据读取错误", Toast.LENGTH_LONG).show();
+//        }
+//    }
+    /*************************测温结束***************************/
+    /**
+     * 刷卡
+     */
+    private void findCard() {
+
+        Runnable mAutoRefreshRunnable = new Runnable() {
+            @Override
+            public void run() {
+                rfFelicaGetUidFun();
+                handler.removeCallbacks(this);
+                handler.postDelayed(this, 600);
+            }
+        };
+        handler.postDelayed(mAutoRefreshRunnable, 1000);
+    }
+
+    public void rfFelicaGetUidFun() {
+//        tvTip.setText("");
+        tvResult.setText("");
+        byte[] pData = new byte[16];
+        byte[] pLen = new byte[1];
+        nStatus = myzrfidAPI.rfGetNameCardUid(nfd, 0, (byte) (0), pData, pLen);
+        if (nStatus == 1) {
+//            tvTip.setText("寻卡成功！");
+            tvResult.setText(ByteArrayToString(pData, (int) (pLen[0])));
+        } else {
+//            tvTip.setText("寻卡失败！");
+        }
+    }
+
+    public String ByteArrayToString(byte[] bt_ary, int len) {
+        StringBuilder sb = new StringBuilder();
+        int i;
+        if (bt_ary != null)
+            if (len < bt_ary.length) {
+                for (i = 0; i < len; i++) {
+                    sb.append(String.format("%02X ", bt_ary[i]));
+                }
+            } else {
+                for (byte b : bt_ary) {
+                    sb.append(String.format("%02X ", b));
+                }
+            }
+        return sb.toString();
+    }
+
+//    public void initUI() {
+//        tvTip = findViewById(R.id.tv_tip);
+//        tvResult  = findViewById(R.id.tv_card);
+//    }
+
+    public void rfInitComFun() {
+        nfd = myzrfidAPI.rfInitCom(0, "/dev/ttyS4", 19200);
+        if (nfd > 0) {
+            nIsOpenCom = 1;
+//            tvTip.setText("串口打开成功！");
+        } else {
+            nIsOpenCom = 0;
+//            tvTip.setText("串口打开失败！");
+        }
+    }
+
+    public void rfClosePortFun() {
+        if (nIsOpenCom == 0) {
+//            tvTip.setText("串口未打开");
+            return;
+        }
+        nStatus = myzrfidAPI.rfClosePort(nfd, 0);
+        if (nStatus == 1) {
+//            tvTip.setText("串口关闭成功！");
+        } else {
+//            tvTip.setText("串口关闭失败！");
+        }
+    }
+    /*****************刷卡模块函数结束**********************/
 }

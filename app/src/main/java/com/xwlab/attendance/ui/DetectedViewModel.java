@@ -136,7 +136,7 @@ public class DetectedViewModel extends ViewModel {
     //温度检测
 
     private MutableLiveData<RelativeRect> faceRectLiveData = new MutableLiveData<>();
-    public LiveData<TemperatureInfo> temperatureInfoLiveData = Transformations.switchMap(faceRectLiveData, faceRect -> Repository.getInstance().liveDetect(faceRect));
+//    public LiveData<TemperatureInfo> temperatureInfoLiveData = Transformations.switchMap(faceRectLiveData, faceRect -> Repository.getInstance().liveDetect(faceRect));
 
     public void liveDetect(float left, float top, float right, float bottom) {
 //        faceRectLiveData.setValue(faceRect);

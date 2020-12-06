@@ -15,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 public class Utils {
     private final static String TAG = "Utils";
@@ -85,13 +86,13 @@ public class Utils {
         try {
             if (bitmap != null) {
                 baos = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
 
                 baos.flush();
                 baos.close();
-
+                Logger.i("bitmap",bitmap.toString());
                 byte[] bitmapBytes = baos.toByteArray();
-
+                Logger.i("bitmapBytes", Arrays.toString(bitmapBytes));
                 result = Base64.encodeToString(bitmapBytes, Base64.NO_WRAP);
             }
         } catch (IOException e) {

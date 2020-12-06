@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -280,7 +281,7 @@ public class InitActivity extends AppCompatActivity implements AdapterView.OnIte
                 city = cityArray[position];
                 switch (city) {
                     case "广州市":
-                        communityArray = new String[]{"请选择", "豪利花园", "凯旋新世界广粤尊府", "翡翠绿洲森林半岛", "中海康城花园", "云溪四季"};
+                        communityArray = new String[]{"请选择", "华南理工大学", "豪利花园", "凯旋新世界广粤尊府", "翡翠绿洲森林半岛", "中海康城花园", "云溪四季"};
                         break;
                     case "深圳市":
                         communityArray = new String[]{"请选择", "国展苑", "龙珠花园", "万科清林径", "英郡年华", "万象天成"};
@@ -295,6 +296,9 @@ public class InitActivity extends AppCompatActivity implements AdapterView.OnIte
             case R.id.sp_community:
                 community = communityArray[position];
                 switch (community) {
+                    case "华南理工大学":
+                        gateArray = new String[]{"请选择", "1号楼", "2号楼", "3号楼", "4号楼"};
+                        break;
                     case "豪利花园":
                         gateArray = new String[]{"请选择", "南门", "1幢", "2幢", "3幢", "4幢", "5幢", "6幢", "7幢", "8幢", "9幢", "10幢", "11幢", "12幢", "13幢", "14幢", "15幢"};
                         break;
@@ -347,25 +351,31 @@ public class InitActivity extends AppCompatActivity implements AdapterView.OnIte
             shareUtil.saveBoolean("hasAddress", true);
             shareUtil.saveString("community", community);
             shareUtil.saveString("gate", gate);
-            Coordinates coordinates = getCoordinates(community,gate);
-            shareUtil.saveFloat("longitude",coordinates.getLongitude());
-            shareUtil.saveFloat("latitude",coordinates.getLatitude());
+            Coordinates coordinates = getCoordinates(community, gate);
+            shareUtil.saveString("longitude", coordinates.getLongitude());
+            shareUtil.saveString("latitude", coordinates.getLatitude());
             Intent intent = new Intent(this, Main3Activity.class);
             startActivity(intent);
 //            initWork();
         }
     }
 
-    private Coordinates getCoordinates(String community,String gate){
+    private Coordinates getCoordinates(String community, String gate) {
         switch (community) {
             case "豪利花园":
                 switch (gate) {
                     case "南门":
-                        return new Coordinates(113.34664f,23.15318f);
+                        return new Coordinates("113.34664", "23.15318");
                 }
-            break;
+                break;
+            case "华南理工大学":
+                switch (gate) {
+                    case "3号楼":
+                        return new Coordinates("113.34664", "23.15318");
+                }
+                break;
         }
-        return new Coordinates(0,0);
+        return new Coordinates(null, null);
     }
 
     private void copyBigDataToSD(String strOutFileName) throws IOException {

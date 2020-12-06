@@ -124,7 +124,7 @@ public class FaceView extends View {
 
         double key = keyValue(face);          					// 密钥值
         // 加密
-        return new EncryptFace(processBitmap(face, key),String.valueOf(key));
+        return new EncryptFace(processBitmap(face, key),key);
     }
 
     public void showEncryptFace(Bitmap face, Rect rect) {

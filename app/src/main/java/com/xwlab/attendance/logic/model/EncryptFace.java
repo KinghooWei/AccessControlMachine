@@ -4,9 +4,9 @@ import android.graphics.Bitmap;
 
 public class EncryptFace {
     private Bitmap encryptFace;
-    private String key;
+    private Double key;
 
-    public EncryptFace(Bitmap encryptFace,String key){
+    public EncryptFace(Bitmap encryptFace,Double key){
         this.encryptFace=encryptFace;
         this.key=key;
     }
@@ -15,7 +15,7 @@ public class EncryptFace {
         return encryptFace;
     }
 
-    public String getKey() {
+    public Double getKey() {
         return key;
     }
 }
