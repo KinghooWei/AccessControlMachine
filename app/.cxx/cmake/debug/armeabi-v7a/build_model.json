@@ -189,7 +189,6 @@
       "project": {
         "compilerSettingsCacheFolder": "F:\\project\\AS\\Attendance\\.cxx",
         "cxxFolder": "F:\\project\\AS\\Attendance\\.cxx",
-        "ideBuildTargetAbi": "armeabi-v7a,armeabi",
         "isBuildOnlyTargetAbiEnabled": true,
         "isCmakeBuildCohabitationEnabled": false,
         "isNativeCompilerSettingsCacheEnabled": false,

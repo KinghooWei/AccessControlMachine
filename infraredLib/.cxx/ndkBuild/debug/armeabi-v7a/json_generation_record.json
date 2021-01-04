@@ -13,7 +13,85 @@
   },
   {
     "level": "INFO",
-    "message": "JSON \u0027F:\\project\\AS\\Attendance\\infraredLib\\.cxx\\ndkBuild\\debug\\armeabi-v7a\\android_gradle_build.json\u0027 was up-to-date",
+    "message": "rebuilding JSON F:\\project\\AS\\Attendance\\infraredLib\\.cxx\\ndkBuild\\debug\\armeabi-v7a\\android_gradle_build.json due to:",
+    "file": "F:\\project\\AS\\Attendance\\infraredLib\\src\\main\\jni\\Android.mk",
+    "tag": "debug|armeabi-v7a"
+  },
+  {
+    "level": "INFO",
+    "message": "- command changed from previous, will remove stale json folder",
+    "file": "F:\\project\\AS\\Attendance\\infraredLib\\src\\main\\jni\\Android.mk",
+    "tag": "debug|armeabi-v7a"
+  },
+  {
+    "level": "INFO",
+    "message": "- a dependent build file changed",
+    "file": "F:\\project\\AS\\Attendance\\infraredLib\\src\\main\\jni\\Android.mk",
+    "tag": "debug|armeabi-v7a"
+  },
+  {
+    "level": "INFO",
+    "message": "  - F:\\project\\AS\\Attendance\\infraredLib\\src\\main\\jni\\Android.mk",
+    "file": "F:\\project\\AS\\Attendance\\infraredLib\\src\\main\\jni\\Android.mk",
+    "tag": "debug|armeabi-v7a"
+  },
+  {
+    "level": "INFO",
+    "message": "  - F:\\project\\AS\\Attendance\\infraredLib\\src\\main\\jni\\Application.mk",
+    "file": "F:\\project\\AS\\Attendance\\infraredLib\\src\\main\\jni\\Android.mk",
+    "tag": "debug|armeabi-v7a"
+  },
+  {
+    "level": "INFO",
+    "message": "removing stale contents from \u0027F:\\project\\AS\\Attendance\\infraredLib\\.cxx\\ndkBuild\\debug\\armeabi-v7a\u0027",
+    "file": "F:\\project\\AS\\Attendance\\infraredLib\\src\\main\\jni\\Android.mk",
+    "tag": "debug|armeabi-v7a"
+  },
+  {
+    "level": "INFO",
+    "message": "created folder \u0027F:\\project\\AS\\Attendance\\infraredLib\\.cxx\\ndkBuild\\debug\\armeabi-v7a\u0027",
+    "file": "F:\\project\\AS\\Attendance\\infraredLib\\src\\main\\jni\\Android.mk",
+    "tag": "debug|armeabi-v7a"
+  },
+  {
+    "level": "INFO",
+    "message": "executing ndkBuild Executable : E:\\sdk\\ndk-bundle\\ndk-build.cmd\narguments : \nNDK_PROJECT_PATH\u003dnull\nAPP_BUILD_SCRIPT\u003dF:\\project\\AS\\Attendance\\infraredLib\\src\\main\\jni\\Android.mk\nNDK_APPLICATION_MK\u003dF:\\project\\AS\\Attendance\\infraredLib\\src\\main\\jni\\Application.mk\nAPP_ABI\u003darmeabi-v7a\nNDK_ALL_ABIS\u003darmeabi-v7a\nNDK_DEBUG\u003d1\nAPP_PLATFORM\u003dandroid-16\nNDK_OUT\u003dF:/project/AS/Attendance/infraredLib/build/intermediates/ndkBuild/debug/obj\nNDK_LIBS_OUT\u003dF:\\project\\AS\\Attendance\\infraredLib\\build\\intermediates\\ndkBuild\\debug\\lib\nAPP_SHORT_COMMANDS\u003dfalse\nLOCAL_SHORT_COMMANDS\u003dfalse\n-B\n-n\njvmArgs : \n\n",
+    "file": "F:\\project\\AS\\Attendance\\infraredLib\\src\\main\\jni\\Android.mk",
+    "tag": "debug|armeabi-v7a"
+  },
+  {
+    "level": "INFO",
+    "message": "Executable : E:\\sdk\\ndk-bundle\\ndk-build.cmd\narguments : \nNDK_PROJECT_PATH\u003dnull\nAPP_BUILD_SCRIPT\u003dF:\\project\\AS\\Attendance\\infraredLib\\src\\main\\jni\\Android.mk\nNDK_APPLICATION_MK\u003dF:\\project\\AS\\Attendance\\infraredLib\\src\\main\\jni\\Application.mk\nAPP_ABI\u003darmeabi-v7a\nNDK_ALL_ABIS\u003darmeabi-v7a\nNDK_DEBUG\u003d1\nAPP_PLATFORM\u003dandroid-16\nNDK_OUT\u003dF:/project/AS/Attendance/infraredLib/build/intermediates/ndkBuild/debug/obj\nNDK_LIBS_OUT\u003dF:\\project\\AS\\Attendance\\infraredLib\\build\\intermediates\\ndkBuild\\debug\\lib\nAPP_SHORT_COMMANDS\u003dfalse\nLOCAL_SHORT_COMMANDS\u003dfalse\n-B\n-n\njvmArgs : \n\n",
+    "file": "F:\\project\\AS\\Attendance\\infraredLib\\src\\main\\jni\\Android.mk",
+    "tag": "debug|armeabi-v7a"
+  },
+  {
+    "level": "INFO",
+    "message": "done executing ndkBuild",
+    "file": "F:\\project\\AS\\Attendance\\infraredLib\\src\\main\\jni\\Android.mk",
+    "tag": "debug|armeabi-v7a"
+  },
+  {
+    "level": "INFO",
+    "message": "write build output F:\\project\\AS\\Attendance\\infraredLib\\.cxx\\ndkBuild\\debug\\armeabi-v7a\\build_output.txt",
+    "file": "F:\\project\\AS\\Attendance\\infraredLib\\src\\main\\jni\\Android.mk",
+    "tag": "debug|armeabi-v7a"
+  },
+  {
+    "level": "INFO",
+    "message": "parse and convert ndk-build output to build configuration JSON",
+    "file": "F:\\project\\AS\\Attendance\\infraredLib\\src\\main\\jni\\Android.mk",
+    "tag": "debug|armeabi-v7a"
+  },
+  {
+    "level": "INFO",
+    "message": "found application make file F:\\project\\AS\\Attendance\\infraredLib\\src\\main\\jni\\Application.mk",
+    "file": "F:\\project\\AS\\Attendance\\infraredLib\\src\\main\\jni\\Android.mk",
+    "tag": "debug|armeabi-v7a"
+  },
+  {
+    "level": "INFO",
+    "message": "write command file F:\\project\\AS\\Attendance\\infraredLib\\.cxx\\ndkBuild\\debug\\armeabi-v7a\\build_command.txt",
     "file": "F:\\project\\AS\\Attendance\\infraredLib\\src\\main\\jni\\Android.mk",
     "tag": "debug|armeabi-v7a"
   },
