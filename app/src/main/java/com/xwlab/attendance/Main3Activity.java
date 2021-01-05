@@ -60,7 +60,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
     private Face mFace = new Face();
     private FaceDatabase mFaceDatabase;
     private boolean workThreadFlag;
-    private boolean hasFaceChange=true;         //有无人脸切换
+    private boolean hasFaceChange = true;         //有无人脸切换
     private static File sdDir = Environment.getExternalStorageDirectory();
     private static final String sdPath = sdDir.toString() + "/attendance/";
 
@@ -397,7 +397,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                 startTime = System.currentTimeMillis();
                 int num = faceInfo[0];
                 if (num > 0) {     //画面中有人脸
-                    hasFaceChange=true;
+                    hasFaceChange = true;
                     Logger.i(TAG, "检测到人脸");
                     //表情识别
 //                    long sysTime = new Date().getTime();
@@ -525,7 +525,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                 } else {
                     fvFace.clearCanvas();
                     sendMessageDelayed(Constant.CLEAN_EXPRESSION_AND_TEMPERATURE, 1000);
-                    if (hasFaceChange&& mlx90640InitializeCheck() >= 0) {
+                    if (hasFaceChange && mlx90640InitializeCheck() >= 0) {
                         for (int i = 0; i < 768; ++i) {
                             temperatures[i] = 0;
                         }
@@ -536,7 +536,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                         msg.setData(data);
                         showHandler.sendMessage(msg);
                     }
-                    hasFaceChange=false;
+                    hasFaceChange = false;
 
 //                    haveFace = false;
 //                    sendMessage(Constant.CLOSE_FACE);
@@ -910,9 +910,10 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         int height = 24;
         int thermalLeft = 0;
         int thermalRight = 0;
-        if(relaLeft<0.4){}
-            thermalLeft = Math.max((int) (width * relaLeft) - 3, 0);
-            thermalRight = Math.max((int) (width * relaRight) - 3, 0);
+        if (relaLeft < 0.4) {
+        }
+        thermalLeft = Math.max((int) (width * relaLeft) - 3, 0);
+        thermalRight = Math.max((int) (width * relaRight) - 3, 0);
         if (relaLeft < 0.5) {
             thermalLeft = Math.max((int) (width * relaLeft) - 2, 0);
             thermalRight = Math.max((int) (width * relaRight) - 2, 0);
@@ -996,7 +997,8 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
             float f = (float) faceCount / faceArea;
             float b = (float) backgroundCount / backgroundArea;
             Logger.i(TAG, "人脸：" + faceArea + "背景：" + backgroundArea + "人脸正常像素：" + faceCount + "比例：" + f + "背景异常像素：" + backgroundCount + "比例：" + b);
-            boolean isRealFace = (float) faceCount / faceArea > 0.4;
+//            boolean isRealFace = (float) faceCount / faceArea > 0.4;
+            boolean isRealFace = faceTemperature > 33 && faceTemperature < 42;
 //            TemperatureInfo temperatureInfo = new TemperatureInfo(temperatures, pixels, faceTemperature, isRealFace);
 
             Message msg = showHandler.obtainMessage();
