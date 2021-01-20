@@ -360,6 +360,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         private String name;
         private String phoneNum;
         private long lastTime;
+        private long lastTimeFace;
         private long expressionTime = 0L;
         private long startTime;
         private long temperatureTime = 0L;
@@ -464,13 +465,15 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                             sendMessageDelayed(Constant.CLEAN_TEXT, 2000);
                             long time = System.currentTimeMillis();
                             if (phoneNum.equals(lastFacePhoneNum)) {        //与上一位识别的人相同
-                                long interval = System.currentTimeMillis() - time;
+                                long interval = time - lastTimeFace;
                                 if (interval > 5000) {
                                     String faceBase64 = Utils.bitmapToBase64(faceEncrypt);
                                     String originalFace = Utils.bitmapToBase64(faceRect);
                                     new Thread(new FDHttpThread(phoneNum, name, faceBase64, key)).start();
                                 }
+                                lastTimeFace = time;
                             } else {            //与上一位识别的人不相同
+                                lastTimeFace = time;
                                 lastFacePhoneNum = phoneNum;
                                 String faceBase64 = Utils.bitmapToBase64(faceEncrypt);
                                 String originalFace = Utils.bitmapToBase64(faceRect);
@@ -541,14 +544,14 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
 //                    haveFace = false;
 //                    sendMessage(Constant.CLOSE_FACE);
 
-                    Result result = decodeQR(image);
+                    Result result = decodeQR(face);
                     if (result != null) {   //有二维码
                         String[] data = result.toString().split("-");
                         if (data.length == 3 && data[0].equals("blueCity")) {   //是目标二维码
                             phoneNum = data[1];
                             QRCode = data[2];
 //                        Logger.e(TAG,result.toString());
-                            Long sysTime = new Date().getTime();
+                            long sysTime = new Date().getTime();
 //                        Logger.i(TAG, sysTime.toString());
                             if (phoneNum.equals(lastQRCPhoneNum)) {     //与上一个二维码相同
                                 long interval = sysTime - lastTime;
@@ -562,6 +565,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                                     ringtone.play();
                                     new Thread(new QRCodeHttpThread(phoneNum, QRCode)).start();
                                 }
+                                lastTime = sysTime;
                             } else {        //与上一个二维码不同
                                 if (ringtone != null) {
                                     // 停止播放铃声

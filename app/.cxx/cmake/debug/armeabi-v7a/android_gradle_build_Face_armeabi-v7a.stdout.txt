@@ -1,6 +1,2 @@
 ninja: Entering directory `F:\project\AS\Attendance\app\.cxx\cmake\debug\armeabi-v7a'
-[1/5] Building CXX object CMakeFiles/Face.dir/native-lib.cpp.o
-[2/5] Building CXX object CMakeFiles/Face.dir/recognize.cpp.o
-[3/5] Building CXX object CMakeFiles/Face.dir/face_jni.cpp.o
-[4/5] Building CXX object CMakeFiles/Face.dir/detect.cpp.o
-[5/5] Linking CXX shared library F:\project\AS\Attendance\app\build\intermediates\cmake\debug\obj\armeabi-v7a\libFace.so
+ninja: no work to do.

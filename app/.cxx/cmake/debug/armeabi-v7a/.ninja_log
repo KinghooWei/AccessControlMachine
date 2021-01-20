@@ -9,3 +9,8 @@
 12	1746	631537364	CMakeFiles/Face.dir/face_jni.cpp.o	a742c8b5f568ed2a
 126	1972	631537365	CMakeFiles/Face.dir/detect.cpp.o	bd59f3cd1ff1ad07
 1972	2904	631537365	F:/project/AS/Attendance/app/build/intermediates/cmake/debug/obj/armeabi-v7a/libFace.so	7b1e4e91bce49335
+149	984	632128155	CMakeFiles/Face.dir/native-lib.cpp.o	57f6febb14999b30
+188	1362	632128155	CMakeFiles/Face.dir/recognize.cpp.o	dc06dc64b1b5c9f8
+71	1550	632128155	CMakeFiles/Face.dir/face_jni.cpp.o	a742c8b5f568ed2a
+11	2240	632128156	CMakeFiles/Face.dir/detect.cpp.o	bd59f3cd1ff1ad07
+2240	3328	632128157	F:/project/AS/Attendance/app/build/intermediates/cmake/debug/obj/armeabi-v7a/libFace.so	7b1e4e91bce49335

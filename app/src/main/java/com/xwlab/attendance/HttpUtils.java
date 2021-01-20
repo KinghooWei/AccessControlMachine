@@ -24,6 +24,7 @@ import okhttp3.Request;
 
 public class HttpUtils {
     private static String jsonApiUrl = "http://192.168.1.220:8080/door/api"; //通用的json api接口
+//private static String jsonApiUrl = "http://172.20.10.10:8080/door/api"; //通用的json api接口
 //    private static String jsonApiUrl = "http://192.168.43.244:8080/door/api"; //通用的json api接口
     private static String multipartApiUrl = "http://192.168.43.178:8080/door/multipartApi/"; //通用的multipart api接口
     private static URL url;
