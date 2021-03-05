@@ -55,6 +55,9 @@ import java.util.Date;
 
 import static com.xwlab.attendance.HttpUtils.sendJsonPost;
 
+/**
+ * 表情、温度、加密、二维码、刷卡
+ */
 public class Main3Activity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "WorkActivity";
     private Face mFace = new Face();
