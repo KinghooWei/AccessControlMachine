@@ -5,9 +5,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Environment;
-import android.text.TextUtils;
 import android.util.Log;
 
+import com.xwlab.attendance.logic.dao.User;
 import com.xwlab.util.SharedPreferencesUtil;
 
 import org.json.JSONArray;
@@ -17,9 +17,9 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
-import java.util.Vector;
 
 import static java.lang.Math.sqrt;
 
@@ -28,10 +28,7 @@ public class FaceDatabase {
     private String logFile;
     private String logDir;
     private final String mtable = "FaceInfo";
-    private Vector<double[]> features = new Vector<>();
-    private Vector<String> names = new Vector<>();
-    private Vector<String> phoneNums = new Vector<>();
-    private Vector<String> passwords = new Vector<>();
+    private List<User> userList = new ArrayList<>();
     private static final String TAG = "FaceDatabase";
     boolean initialedStatus = false;
     //    private SharedPreferences share;
@@ -45,22 +42,7 @@ public class FaceDatabase {
         logDir = sdDir.toString() + "/attendance/";
         logFile = logDir + "update_log.txt";
 
-        //从sqlite数据库中加载
-        helper = new MyDatabaseHelper(context, "faceDataBase.db");
-        SQLiteDatabase database = helper.getWritableDatabase();
-        Cursor cursor = database.query(mtable, null, null, null, null, null, null);
-        if (cursor.moveToFirst()) {
-            do {
-                String phoneNum = cursor.getString(cursor.getColumnIndex("phoneNum"));
-                String name = cursor.getString(cursor.getColumnIndex("name"));
-                String feature = cursor.getString(cursor.getColumnIndex("feature"));
-                String password = cursor.getString(cursor.getColumnIndex("password"));
-                Logger.i(TAG, "从SQL读取信息 phoneNum: " + phoneNum + " name: " + name);
-                Logger.i(TAG, feature);
-                insertRAM(name, phoneNum, password, feature);
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
+        loadSQL();
     }
 
     /**
@@ -83,20 +65,16 @@ public class FaceDatabase {
     /**
      * 更新RAM的用户数据
      */
-    private void updateRAM(String name, String phoneNum, String password, String feature) {
+    private void updateRAM(User user) {
         // 遍历内存的信息，修改指定用户信息
-        for (int i = 0; i < phoneNums.size(); i++) {
-            if (phoneNums.get(i).equals(phoneNum)) {
-                //特征字符串切割转换为字符数组
-                double[] featureArray;
-                featureArray = featureStringToArray(feature);
-
-                features.set(i, featureArray);
-                names.set(i, name);
-                phoneNums.set(i, phoneNum);
-                passwords.set(i, password);
+        int index = 0;
+        for (User cur : userList) {
+            if (user.getPhoneNum().equals(cur.getPhoneNum())) {
+                userList.remove(index);
+                userList.add(user);
                 break;
             }
+            index++;
         }
     }
 
@@ -114,66 +92,47 @@ public class FaceDatabase {
         Logger.i(TAG, "新增人员 name: " + name + " phoneNum: " + phoneNum);
     }
 
-    /**
-     * 向RAM增添新用户信息
-     */
-    private void insertRAM(String name, String phoneNum, String password, String feature) {
-        //特征字符串切割转换为字符数组
-        double[] featureArray;
-        featureArray = featureStringToArray(feature);
-
-        features.add(featureArray);
-        names.add(name);
-        phoneNums.add(phoneNum);
-        passwords.add(password);
-    }
-
 
     /**
      * 比对人脸特征
      *
      * @return 返回匹配的人名，比对不成功则返回""
      */
-    public Object[] featureCmp(String fstr) {
-//        Logger.i(TAG,fstr);
-
-        Logger.i(TAG, Arrays.toString(features.get(0)));
-        Object[] objects;
-        String fs[] = fstr.split(",");
-        if (fs.length != 128) {
-            fs = fstr.split(" ");
-            if (fs.length != 128) {
-                objects = new Object[]{"", "-1"};
-                return objects;
-            }
-        }
+    public User featureCmp(String fstr) {
+        String[] fs = fstr.split(",");
         double[] feature = new double[128];
         for (int i = 0; i < 128; i++) {
             feature[i] = Double.parseDouble(fs[i]);
         }
         int index = 0;
         double mSim = 0;
-        for (int i = 0; i < features.size(); i++) {
-            if (features.get(i) != null) {
-                double sim = calculSimilar(feature, features.get(i));
-                Log.i(TAG, names.get(i) + String.valueOf(sim));
+        for (int i = 0; i < userList.size(); i++) {
+            if (userList.get(i).getFeature() != null) {
+                double sim = calculSimilar(feature, userList.get(i).getFeature());
+                Log.i(TAG, userList.get(i).getName() + String.valueOf(sim));
                 if (sim > mSim) {
                     index = i;
                     mSim = sim;     //选出匹配度最高的
-
+                }
+            }
+        }
+        double temp = mSim;
+        for (int i = 0; i < userList.size(); i++) {
+            if (userList.get(i).getFeatureWithMask() != null) {
+                double sim = calculSimilar(feature, userList.get(i).getFeatureWithMask());
+                Log.i(TAG, userList.get(i).getName() + String.valueOf(sim));
+                if (sim > mSim) {
+                    index = i;
+                    mSim = sim;     //选出匹配度最高的
                 }
             }
         }
         Logger.i(TAG, "mSim is " + mSim);
         if (mSim > 0.6) {
-            objects = new Object[]{names.get(index), phoneNums.get(index)};
-            return objects;
-        } else if (mSim < 0.3) {
-            objects = new Object[]{"unknown", null};
-            return objects;
+            userList.get(index).setMask(temp != mSim);
+            return userList.get(index);
         } else {
-            objects = new Object[]{"", null};
-            return objects;
+            return null;
         }
     }
 
@@ -182,14 +141,9 @@ public class FaceDatabase {
      */
     public boolean passwordCmp(String input) {
         Logger.i(TAG, input);
-        for (int i = 0; i < passwords.size(); i++) {
-            Logger.i(TAG, passwords.get(i) + passwords.get(i).length());
-            if (!passwords.get(i).isEmpty() || !passwords.get(i).equals("null")) {
-                Logger.i(TAG, i + "not null");
-                if (passwords.get(i).equals(input)) {
-                    Logger.i(TAG, "success");
-                    return true;
-                }
+        for (User user : userList) {
+            if (input.equals(user.getPassword())) {
+                return true;
             }
         }
         return false;
@@ -345,10 +299,7 @@ public class FaceDatabase {
         if (file.exists()) {
             boolean res = file.delete();
         }
-        features.clear();
-        names.clear();
-        phoneNums.clear();
-        passwords.clear();
+        userList.clear();
         return delete;
     }
 
@@ -378,13 +329,10 @@ public class FaceDatabase {
 
     //特征描述字符串转double数组
     private double[] featureStringToArray(String feature) {
-
-        if (feature.isEmpty() || feature.equals("null")) {
+        if (feature == null || feature.isEmpty() || feature.equals("null")) {
             return null;
         } else {
-            Logger.i(TAG, "开始分割转换：" + feature);
             String[] fs = feature.split(" ");        //按空格分割
-
             double[] featureArray = new double[128];
             for (int i = 0; i < 128; i++) {
                 featureArray[i] = Double.parseDouble(fs[i]);
@@ -517,6 +465,27 @@ public class FaceDatabase {
         return true;
     }
 
+    /**
+     * 加载本地数据库
+     */
+    private void loadSQL() {
+        //从sqlite数据库中加载
+        helper = new MyDatabaseHelper(AttendanceApplication.context, "faceDataBase.db");
+        SQLiteDatabase database = helper.getWritableDatabase();
+        Cursor cursor = database.query(mtable, null, null, null, null, null, null);
+        if (cursor.moveToFirst()) {
+            do {
+                String phoneNum = cursor.getString(cursor.getColumnIndex("phoneNum"));
+                String name = cursor.getString(cursor.getColumnIndex("name"));
+                String feature = cursor.getString(cursor.getColumnIndex("feature"));
+                String featureWithMask = cursor.getString(cursor.getColumnIndex("feature_with_mask"));
+                String password = cursor.getString(cursor.getColumnIndex("password"));
+                userList.add(new User(name, phoneNum, featureStringToArray(feature), featureStringToArray(featureWithMask), password));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+    }
+
     // 从后台(云端)获取人脸数据库
     public class Updatemysql implements Runnable {
         @Override
@@ -547,38 +516,28 @@ public class FaceDatabase {
             int updateCount = 0;
             try {
                 JSONObject jsonObj = new JSONObject(result);
-                int resultCode = jsonObj.getInt("resultCode");
+                int resultCode = jsonObj.optInt("resultCode");
                 if (resultCode == -1) {
                     Logger.i(TAG, "resultCode is -1");
-                    JSONArray personInfos = (JSONArray) jsonObj.get("personInfos");
-                    Logger.i(TAG, "personInfos are " + personInfos);
-                    for (int i = 0; i < personInfos.length(); i++) {
-                        String personInfo = (String) personInfos.get(i);
-                        String[] infos = personInfo.split(",");
-                        String phoneNum = infos[0];
-                        String name = infos[1];
-                        String password = infos[2];
-                        int start = personInfo.indexOf('[');
-                        int end = personInfo.indexOf(']');
-                        String feature = personInfo.substring(start + 1, end);
-                        if (TextUtils.isEmpty(feature) || feature.equals("null")) {
-                            feature = null;
-                        } else {
-                            //判断人脸特征格式是否正确
-                            String[] fs = feature.split(" ");
-                            if (fs.length != 128) {
-                                Logger.i(TAG, "人脸特征格式不正确，姓名：" + name + "，手机：" + phoneNum + "，特征：" + feature + "，未录入");
-                                feature = null;
-                            }
-                        }
+                    JSONArray userArray = jsonObj.optJSONArray("userArray");
+                    Logger.i(TAG, "personInfos are " + userArray);
+                    for (int i = 0; i < userArray.length(); i++) {
+                        JSONObject userJson = userArray.getJSONObject(i);
+                        String name = userJson.optString("name");
+                        String phoneNum = userJson.optString("phoneNum");
+                        String feature = userJson.optString("feature");
+                        String featureWithMask = userJson.optString("featureWithMask");
+                        String password = userJson.optString("password");
+                        User user = new User(name, phoneNum, featureStringToArray(feature), featureStringToArray(featureWithMask), password);
+                        Logger.i(TAG, user.toString());
                         if (isExistPhoneNum(phoneNum)) {    //更新信息
                             updateSQL(name, phoneNum, password, feature);
-                            updateRAM(name, phoneNum, password, feature);
+                            updateRAM(user);
                             updateCount++;
                         } else {        //增添信息
                             // 增加新的personId数据
                             insertSQL(name, phoneNum, password, feature);
-                            insertRAM(name, phoneNum, password, feature);
+                            userList.add(user);
                             addCount++;
                         }
                     }

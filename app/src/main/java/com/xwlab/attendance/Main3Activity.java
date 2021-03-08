@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,6 +35,7 @@ import com.google.zxing.common.GlobalHistogramBinarizer;
 import com.google.zxing.qrcode.QRCodeReader;
 import com.lztek.tools.irmeter.MLX906xx;
 import com.serialport.yzrfidAPI;
+import com.xwlab.attendance.logic.dao.User;
 import com.xwlab.attendance.logic.model.EncryptFace;
 import com.xwlab.attendance.ui.DetectedViewModel;
 import com.xwlab.expression.ExpresionRegcognition;
@@ -459,12 +459,12 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                     Logger.i(TAG, "特征提取：" + (System.currentTimeMillis() - startTime));
 
                     startTime = System.currentTimeMillis();
-                    Object[] objects = mFaceDatabase.featureCmp(feature);   //数据库没内容时会报空指针错误
-                    name = (String) objects[0];
-                    phoneNum = (String) objects[1];
-                    if (!TextUtils.isEmpty(phoneNum)) {     //匹配成功
+                    User user = mFaceDatabase.featureCmp(feature);   //数据库没内容时会报空指针错误
+                    if (user != null) {     //匹配成功
+                        name = user.getName();
+                        phoneNum = user.getPhoneNum();
                         if (isRealFace) {
-                            welcome(name);
+                            welcome(user);
                             sendMessageDelayed(Constant.CLEAN_TEXT, 2000);
                             long time = System.currentTimeMillis();
                             if (phoneNum.equals(lastFacePhoneNum)) {        //与上一位识别的人相同
@@ -809,6 +809,20 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         Message msg = showHandler.obtainMessage();
         msg.what = what;
         showHandler.sendMessageDelayed(msg, delayMillis);
+    }
+
+    private void welcome(User user) {
+        showHandler.removeCallbacksAndMessages(null);
+        Message msg = showHandler.obtainMessage();
+        msg.what = Constant.WELCOME;
+        Bundle data = new Bundle();
+        if (user.isMask()) {
+            data.putString("name", user.getName() + "（口罩）");
+        } else {
+            data.putString("name", user.getName());
+        }
+        msg.setData(data);
+        showHandler.sendMessage(msg);
     }
 
     private void welcome(String name) {
