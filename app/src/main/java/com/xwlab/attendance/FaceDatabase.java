@@ -48,7 +48,7 @@ public class FaceDatabase {
     /**
      * 更新SQL的用户数据
      */
-    private void updateSQL(String name, String phoneNum, String password, String feature) {
+    private void updateSQL(String name, String phoneNum, String password, String feature, String featureWithMask) {
         SQLiteDatabase database = helper.getWritableDatabase();
         // 使用android封装的SQL语法
         ContentValues values = new ContentValues();
@@ -56,6 +56,7 @@ public class FaceDatabase {
         values.put("feature", feature);
         values.put("phoneNum", phoneNum);
         values.put("password", password);
+        values.put("feature_with_mask", featureWithMask);
 
         // 更新数据库的信息
         int update = database.update(mtable, values, "phoneNum = ?", new String[]{phoneNum});   //返回受影响的行
@@ -81,13 +82,14 @@ public class FaceDatabase {
     /**
      * 向SQL增添新用户信息
      */
-    private void insertSQL(String name, String phoneNum, String password, String feature) {
+    private void insertSQL(String name, String phoneNum, String password, String feature, String featureWithMask) {
         SQLiteDatabase database = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("name", name);
         values.put("feature", feature);
         values.put("phoneNum", phoneNum);
         values.put("password", password);
+        values.put("feature_with_mask", featureWithMask);
         long insert = database.insert(mtable, null, values);
         Logger.i(TAG, "新增人员 name: " + name + " phoneNum: " + phoneNum);
     }
@@ -531,12 +533,12 @@ public class FaceDatabase {
                         User user = new User(name, phoneNum, featureStringToArray(feature), featureStringToArray(featureWithMask), password);
                         Logger.i(TAG, user.toString());
                         if (isExistPhoneNum(phoneNum)) {    //更新信息
-                            updateSQL(name, phoneNum, password, feature);
+                            updateSQL(name, phoneNum, password, feature, featureWithMask);
                             updateRAM(user);
                             updateCount++;
                         } else {        //增添信息
                             // 增加新的personId数据
-                            insertSQL(name, phoneNum, password, feature);
+                            insertSQL(name, phoneNum, password, feature, featureWithMask);
                             userList.add(user);
                             addCount++;
                         }
