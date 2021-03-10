@@ -12,6 +12,7 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
             "name text, " +
             "feature text," +
             "feature_with_mask text," +
+            "feature_with_glasses text," +
             "phoneNum text," +
             "password text" +
             ")";

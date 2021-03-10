@@ -816,7 +816,9 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         Message msg = showHandler.obtainMessage();
         msg.what = Constant.WELCOME;
         Bundle data = new Bundle();
-        if (user.isMask()) {
+        if (user.hasGlasses()) {
+            data.putString("name", user.getName() + "（墨镜）");
+        } else if (user.hasMask()) {
             data.putString("name", user.getName() + "（口罩）");
         } else {
             data.putString("name", user.getName());
