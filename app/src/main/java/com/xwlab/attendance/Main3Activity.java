@@ -52,6 +52,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.Date;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import static com.xwlab.attendance.HttpUtils.sendJsonPost;
 
@@ -149,36 +150,6 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         rfClosePortFun();
     }
 
-//    private Runnable mAutoRefreshRunnable = null;
-
-//    private void onBtnAuto() {
-//        if (null == mAutoRefreshRunnable) {
-//            if (mlx90640InitializeCheck() < 0) {
-//                return;
-//            }
-//            mAutoRefreshRunnable = new Runnable() {
-//                @Override
-//                public void run() {
-//                    mlx90640Measure();
-//                    int interval = 500;
-//                    int refreshRate = mMLX90640.getRefreshRate();
-//                    if (refreshRate != 0) {
-//                        interval = ((1000 * 1000) >> (refreshRate - 1)) / 1000;
-//                    } else {
-//                        interval = 2000;
-//                    }
-//                    mHandler.removeCallbacks(this);
-//                    mHandler.postDelayed(this, interval < 100 ? 500 : interval);
-//                }
-//            };
-//            mHandler.postDelayed(mAutoRefreshRunnable, 100);
-//        } else {
-//            mHandler.removeCallbacks(mAutoRefreshRunnable);
-//            mAutoRefreshRunnable = null;
-//        }
-//    }
-
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.function, menu);
@@ -236,15 +207,6 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-
-//    float[] mlx90640ImageP0 = new float[768];
-//    float[] mlx90640ImageP1 = new float[768];
-//    float[] mlx90640ToP0 = new float[768];
-//    float[] mlx90640ToP1 = new float[768];
-
-//    float[] mTemperature = new float[768];
-//    float[] mImages = new float[768];
-
     private TextView tvExpression;
 
     private void UIInit() {
@@ -255,7 +217,6 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         fvFace = findViewById(R.id.fv_face);
         tvResult = findViewById(R.id.tv_result);
         etPwd = findViewById(R.id.et_pwd);
-//        btnEncrypt = findViewById(R.id.btn_encrypt);
         fabSwitch = findViewById(R.id.fab_switch);
         ImageView ivBackground = findViewById(R.id.iv_background);
 
@@ -274,8 +235,6 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         findViewById(R.id.button9).setOnClickListener(this);
         findViewById(R.id.button0).setOnClickListener(this);
         findViewById(R.id.button_cancel).setOnClickListener(this);
-//        btnEncrypt.setOnClickListener(this);
-//        findViewById(R.id.btn_updateSQL).setOnClickListener(this);
 
         viewModel.expression.observe(this, expression -> tvExpression.setText(expression));
 //        viewModel.temperatureInfoLiveData.observe(this, temperatureInfo -> {

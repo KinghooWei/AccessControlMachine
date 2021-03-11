@@ -49,20 +49,20 @@ public class FaceDatabase {
     /**
      * 更新SQL的用户数据
      */
-    private void updateSQL(User user) {
+    private void updateSQL(String name, String phoneNum, String feature, String featureWithMask, String featureWithGlasses, String password) {
         SQLiteDatabase database = helper.getWritableDatabase();
         // 使用android封装的SQL语法
         ContentValues values = new ContentValues();
-        values.put("name", user.getName());
-        values.put("feature", Arrays.toString(user.getFeature()));
-        values.put("phoneNum", user.getPhoneNum());
-        values.put("password", user.getPassword());
-        values.put("feature_with_mask", Arrays.toString(user.getFeatureWithMask()));
-        values.put("feature_with_glasses", Arrays.toString(user.getFeatureWithGlasses()));
+        values.put("name", name);
+        values.put("feature", feature);
+        values.put("phoneNum", phoneNum);
+        values.put("password", password);
+        values.put("feature_with_mask", featureWithMask);
+        values.put("feature_with_glasses", featureWithGlasses);
 
         // 更新数据库的信息
-        int update = database.update(mtable, values, "phoneNum = ?", new String[]{user.getPhoneNum()});   //返回受影响的行
-        Logger.i(TAG, "更新人员 name: " + user.getName() + " phoneNum: " + user.getPhoneNum());
+        int update = database.update(mtable, values, "phoneNum = ?", new String[]{phoneNum});   //返回受影响的行
+        Logger.i(TAG, "更新人员 name: " + name + " phoneNum: " + phoneNum);
     }
 
     /**
@@ -84,17 +84,17 @@ public class FaceDatabase {
     /**
      * 向SQL增添新用户信息
      */
-    private void insertSQL(User user) {
+    private void insertSQL(String name, String phoneNum, String feature, String featureWithMask, String featureWithGlasses, String password) {
         SQLiteDatabase database = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put("name", user.getName());
-        values.put("feature", Arrays.toString(user.getFeature()));
-        values.put("phoneNum", user.getPhoneNum());
-        values.put("password", user.getPassword());
-        values.put("feature_with_mask", Arrays.toString(user.getFeatureWithMask()));
-        values.put("feature_with_glasses", Arrays.toString(user.getFeatureWithGlasses()));
+        values.put("name", name);
+        values.put("phoneNum", phoneNum);
+        values.put("password", password);
+        values.put("feature", feature);
+        values.put("feature_with_mask", featureWithMask);
+        values.put("feature_with_glasses", featureWithGlasses);
         long insert = database.insert(mtable, null, values);
-        Logger.i(TAG, "新增人员 name: " + user.getName() + " phoneNum: " + user.getPhoneNum());
+        Logger.i(TAG, "新增人员 name: " + name + " phoneNum: " + phoneNum);
     }
 
 
@@ -552,12 +552,12 @@ public class FaceDatabase {
                         User user = new User(name, phoneNum, featureStringToArray(feature), featureStringToArray(featureWithMask), featureStringToArray(featureWithGlasses), password);
                         Logger.i(TAG, user.toString());
                         if (isExistPhoneNum(phoneNum)) {    //更新信息
-                            updateSQL(user);
+                            updateSQL(name, phoneNum, feature, featureWithMask, featureWithGlasses, password);
                             updateRAM(user);
                             updateCount++;
                         } else {        //增添信息
                             // 增加新的personId数据
-                            insertSQL(user);
+                            insertSQL(name, phoneNum, feature, featureWithMask, featureWithGlasses, password);
                             userList.add(user);
                             addCount++;
                         }
