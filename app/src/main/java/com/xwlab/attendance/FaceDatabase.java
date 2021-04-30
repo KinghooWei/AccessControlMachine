@@ -500,6 +500,7 @@ public class FaceDatabase {
                 String featureWithMask = cursor.getString(cursor.getColumnIndex("feature_with_mask"));
                 String featureWithGlasses = cursor.getString(cursor.getColumnIndex("feature_with_glasses"));
                 String password = cursor.getString(cursor.getColumnIndex("password"));
+                Logger.i(TAG, name + feature);
                 userList.add(new User(name, phoneNum, featureStringToArray(feature), featureStringToArray(featureWithMask), featureStringToArray(featureWithGlasses), password));
             } while (cursor.moveToNext());
         }

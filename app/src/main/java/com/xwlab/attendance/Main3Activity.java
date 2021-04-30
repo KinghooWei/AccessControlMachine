@@ -362,13 +362,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                 if (num > 0) {     //画面中有人脸
                     hasFaceChange = true;
                     Logger.i(TAG, "检测到人脸");
-                    //表情识别
-//                    long sysTime = new Date().getTime();
-                    if (System.currentTimeMillis() - expressionTime > 2000) {
-                        expressionTime = System.currentTimeMillis();
-                        viewModel.detectFaceEmotion(face);
-                    }
-                    Logger.i(TAG, "表情识别：" + (System.currentTimeMillis() - startTime));
+
 
                     startTime = System.currentTimeMillis();
                     //截取最大的人脸
@@ -388,28 +382,13 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                     Rect rect = new Rect(left, top, right, bottom);
                     //温度检测
 
-                    if (System.currentTimeMillis() - temperatureTime > 1000) {
-                        temperatureTime = System.currentTimeMillis();
-//                        viewModel.liveDetect((float) left / width, (float) top / height, (float) right / width, (float) bottom / height);
-                        if (mlx90640InitializeCheck() >= 0) {
-                            isRealFace = liveDetect((float) left / width, (float) top / height, (float) right / width, (float) bottom / height);
-                        }
-
-                        Logger.i(TAG, "温度检测：" + (System.currentTimeMillis() - startTime));
-                    }
-
+                    faceRect = Bitmap.createBitmap(face, left, top, right - left, bottom - top);
                     startTime = System.currentTimeMillis();
                     //加密或者画矩形框
-                    faceRect = Bitmap.createBitmap(face, left, top, right - left, bottom - top);
                     EncryptFace encryptFace = fvFace.encryptFace(faceRect);
                     Bitmap faceEncrypt = encryptFace.getEncryptFace();
                     Double key = encryptFace.getKey();
-                    if (encryption) {
-                        fvFace.showEncryptFace(faceEncrypt, rect);
-                    } else {
-                        fvFace.drawRect(rect);
-                    }
-                    Logger.i(TAG, "画框或加密：" + (System.currentTimeMillis() - startTime));
+
 
                     startTime = System.currentTimeMillis();
                     //特征提取
@@ -447,6 +426,34 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                         }
                         Logger.i(TAG, "特征匹配：" + (System.currentTimeMillis() - startTime));
                     }
+
+                    if (encryption) {
+                        fvFace.showEncryptFace(faceEncrypt, rect);
+                    } else {
+                        fvFace.drawRect(rect);
+                    }
+                    Logger.i(TAG, "画框或加密：" + (System.currentTimeMillis() - startTime));
+
+                    if (System.currentTimeMillis() - temperatureTime > 1000) {
+                        temperatureTime = System.currentTimeMillis();
+//                        viewModel.liveDetect((float) left / width, (float) top / height, (float) right / width, (float) bottom / height);
+                        if (mlx90640InitializeCheck() >= 0) {
+                            isRealFace = liveDetect((float) left / width, (float) top / height, (float) right / width, (float) bottom / height);
+                        }
+
+                        Logger.i(TAG, "温度检测：" + (System.currentTimeMillis() - startTime));
+                    }
+
+
+
+                    //表情识别
+//                    long sysTime = new Date().getTime();
+//                    if (System.currentTimeMillis() - expressionTime > 2000) {
+//                        expressionTime = System.currentTimeMillis();
+//                        viewModel.detectFaceEmotion(face);
+//                    }
+//                    Logger.i(TAG, "表情识别：" + (System.currentTimeMillis() - startTime));
+
 //                    if (name.equals("unknown")) {
 //                        Logger.i(TAG, "unknown");
 //                        if (!TextUtils.isEmpty(lastUnknownFeature)) {
