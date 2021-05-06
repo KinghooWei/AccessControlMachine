@@ -28,27 +28,28 @@
 
     <TextView
         android:id="@+id/tv_result"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
         android:gravity="center"
         android:maxLines="1"
-        android:textSize="50sp"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:textSize="70sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
+        tools:text="您好，魏金湖（口罩）" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/cl_camera"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_result">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraintLayout2"
-            android:layout_width="468dp"
-            android:layout_height="270dp"
+            android:layout_width="780dp"
+            android:layout_height="450dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -78,24 +79,6 @@
             <!--                app:layout_constraintTop_toTopOf="@id/cv_preview" />-->
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <com.xwlab.widget.MLXGridView
-            android:id="@+id/grid24x32view"
-            android:layout_width="360dp"
-            android:layout_height="270dp"
-            android:layout_centerInParent="true"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/tv_temperature"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:textSize="30sp"
-            app:layout_constraintEnd_toEndOf="@+id/grid24x32view"
-            app:layout_constraintStart_toStartOf="@+id/grid24x32view"
-            app:layout_constraintTop_toBottomOf="@+id/grid24x32view" />
-
         <TextView
             android:id="@+id/tv_expression"
             android:layout_width="wrap_content"
@@ -112,6 +95,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/fab_switch"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -313,13 +297,12 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/cl_keyboard"
-        android:layout_width="match_parent"
+        android:layout_width="400dp"
         android:layout_height="wrap_content"
         android:background="#99FFFFFF"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         tools:visibility="visible">
 
         <TextView

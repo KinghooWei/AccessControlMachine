@@ -71,8 +71,6 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
     private Camera2View cvPreview;
     private TextView tvResult, etPwd;
     private FaceView fvFace;
-    protected TextView tvTemperature;
-    protected MLXGridView mGridView;
     private FloatingActionButton fabSwitch;
 
     String community;
@@ -100,9 +98,9 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        }
+//        if (getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+//            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+//        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main3);
         setSupportActionBar(findViewById(R.id.toolbar));
@@ -112,11 +110,6 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         mFace.FaceModelInit(sdPath);
         mFaceDatabase = new FaceDatabase(getApplicationContext());
         mFaceDatabase.updateDatabase();
-
-        //测温模块初始化
-        mGridView.setModuleType(MLXGridView.MLX90640);
-        mMLX90640 = new MLX906xx();
-//        mlx90640InitializeCheck();
 
         //刷卡模块初始化
         handler = new Handler();
@@ -180,38 +173,9 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         return true;
     }
 
-    private int[] mRefreshRateValues = new int[]{
-            MLX906xx.MLX90640Refresh1HZ,
-            MLX906xx.MLX90640Refresh2HZ,
-            MLX906xx.MLX90640Refresh4HZ,
-            MLX906xx.MLX90640Refresh8HZ,
-            MLX906xx.MLX90640Refresh16HZ,
-    };
-
-    protected int mlx90640InitializeCheck() {
-
-        int refreshRate = mRefreshRateValues[2];
-
-        if (refreshRate == mMLX90640.getRefreshRate()) {
-            return refreshRate;
-        }
-
-        int ret = mMLX90640.MLX90640_InitProcedure(refreshRate);
-        if (0 != ret) {
-//            Toast.makeText(this, "MLX90640初始化失败", Toast.LENGTH_LONG).show();
-//            mTvTemperature.setText("MLX90640初始化失败！");
-            return ret;
-        } else {
-//            mTvTemperature.setText("MLX90640初始化成功!");
-            return mMLX90640.getRefreshRate();
-        }
-    }
-
     private TextView tvExpression;
 
     private void UIInit() {
-        tvTemperature = findViewById(R.id.tv_temperature);
-        mGridView = findViewById(R.id.grid24x32view);
         cvPreview = findViewById(R.id.cv_preview);
         tvExpression = findViewById(R.id.tv_expression);
         fvFace = findViewById(R.id.fv_face);
@@ -221,7 +185,6 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         ImageView ivBackground = findViewById(R.id.iv_background);
 
         Glide.with(this).load(R.drawable.access_background).into(ivBackground);
-        mGridView.setModuleType(MLXGridView.MLX90640);
 
         fabSwitch.setOnClickListener(this);
         findViewById(R.id.button1).setOnClickListener(this);
@@ -332,8 +295,6 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         private Bitmap face;
         private Bitmap faceRect;
         private ExpresionRegcognition expresionRegcognition = new ExpresionRegcognition();
-        boolean isRealFace = false;
-//        boolean trueFace = false;
 
         @Override
         public void run() {
@@ -401,28 +362,24 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                     if (user != null) {     //匹配成功
                         name = user.getName();
                         phoneNum = user.getPhoneNum();
-                        if (isRealFace) {
-                            welcome(user);
-                            sendMessageDelayed(Constant.CLEAN_TEXT, 2000);
-                            long time = System.currentTimeMillis();
-                            if (phoneNum.equals(lastFacePhoneNum)) {        //与上一位识别的人相同
-                                long interval = time - lastTimeFace;
-                                if (interval > 5000) {
-                                    String faceBase64 = Utils.bitmapToBase64(faceEncrypt);
-                                    String originalFace = Utils.bitmapToBase64(faceRect);
-                                    new Thread(new FDHttpThread(phoneNum, name, faceBase64, key)).start();
-                                }
-                                lastTimeFace = time;
-                            } else {            //与上一位识别的人不相同
-                                lastTimeFace = time;
-                                lastFacePhoneNum = phoneNum;
+
+                        welcome(user);
+                        sendMessageDelayed(Constant.CLEAN_TEXT, 2000);
+                        long time = System.currentTimeMillis();
+                        if (phoneNum.equals(lastFacePhoneNum)) {        //与上一位识别的人相同
+                            long interval = time - lastTimeFace;
+                            if (interval > 5000) {
                                 String faceBase64 = Utils.bitmapToBase64(faceEncrypt);
                                 String originalFace = Utils.bitmapToBase64(faceRect);
                                 new Thread(new FDHttpThread(phoneNum, name, faceBase64, key)).start();
                             }
-                        } else {
-                            sendMessage(Constant.FAKE_FACE);
-                            sendMessageDelayed(Constant.CLEAN_TEXT, 2000);
+                            lastTimeFace = time;
+                        } else {            //与上一位识别的人不相同
+                            lastTimeFace = time;
+                            lastFacePhoneNum = phoneNum;
+                            String faceBase64 = Utils.bitmapToBase64(faceEncrypt);
+                            String originalFace = Utils.bitmapToBase64(faceRect);
+                            new Thread(new FDHttpThread(phoneNum, name, faceBase64, key)).start();
                         }
                         Logger.i(TAG, "特征匹配：" + (System.currentTimeMillis() - startTime));
                     }
@@ -433,17 +390,6 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                         fvFace.drawRect(rect);
                     }
                     Logger.i(TAG, "画框或加密：" + (System.currentTimeMillis() - startTime));
-
-                    if (System.currentTimeMillis() - temperatureTime > 1000) {
-                        temperatureTime = System.currentTimeMillis();
-//                        viewModel.liveDetect((float) left / width, (float) top / height, (float) right / width, (float) bottom / height);
-                        if (mlx90640InitializeCheck() >= 0) {
-                            isRealFace = liveDetect((float) left / width, (float) top / height, (float) right / width, (float) bottom / height);
-                        }
-
-                        Logger.i(TAG, "温度检测：" + (System.currentTimeMillis() - startTime));
-                    }
-
 
 
                     //表情识别
@@ -497,17 +443,6 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                 } else {
                     fvFace.clearCanvas();
                     sendMessageDelayed(Constant.CLEAN_EXPRESSION_AND_TEMPERATURE, 1000);
-                    if (hasFaceChange && mlx90640InitializeCheck() >= 0) {
-                        for (int i = 0; i < 768; ++i) {
-                            temperatures[i] = 0;
-                        }
-                        Message msg = showHandler.obtainMessage();
-                        msg.what = Constant.TEMPERATURE;
-                        Bundle data = new Bundle();
-                        data.putFloatArray("temperatures", temperatures);
-                        msg.setData(data);
-                        showHandler.sendMessage(msg);
-                    }
                     hasFaceChange = false;
 
 //                    haveFace = false;
@@ -824,17 +759,8 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                 case Constant.VERIFY_SUCCESSFULLY:
                     tvResult.setText("验证通过");
                     break;
-                case Constant.FAKE_FACE:
-                    tvResult.setText("疑似假脸");
-                    break;
                 case Constant.CLEAN_EXPRESSION_AND_TEMPERATURE:
                     tvExpression.setText("");
-                    tvTemperature.setText("");
-                    break;
-                case Constant.TEMPERATURE:
-                    data = msg.getData();
-                    tvTemperature.setText("当前温度：" + Utils.t1f(data.getFloat("faceTemperature")) + "度");
-                    mGridView.setTemperature(data.getFloatArray("temperatures"), data.getFloatArray("pixels"));
                     break;
             }
         }
@@ -881,177 +807,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
 //        return res;
 //    }
 
-    /**
-     * 测温
-     */
-    float[] mlx90640ImageP0 = new float[768];
-    float[] mlx90640ImageP1 = new float[768];
-    float[] mlx90640ToP0 = new float[768];
-    float[] mlx90640ToP1 = new float[768];
 
-    float[] temperatures = new float[768];
-    float[] pixels = new float[768];
-
-    public boolean liveDetect(float relaLeft, float relaTop, float relaRight, float relaBottom) {
-
-//        Logger.i("人脸坐标",faceRect.toString());
-        int width = 32;
-        int height = 24;
-        int thermalLeft = 0;
-        int thermalRight = 0;
-        if (relaLeft < 0.4) {
-        }
-        thermalLeft = Math.max((int) (width * relaLeft) - 3, 0);
-        thermalRight = Math.max((int) (width * relaRight) - 3, 0);
-        if (relaLeft < 0.5) {
-            thermalLeft = Math.max((int) (width * relaLeft) - 2, 0);
-            thermalRight = Math.max((int) (width * relaRight) - 2, 0);
-        } else {
-            thermalLeft = Math.max((int) (width * relaLeft) - 1, 0);
-            thermalRight = Math.max((int) (width * relaRight) - 1, 0);
-        }
-
-        int thermalTop = (int) (height * relaTop);
-        int thermalBottom = (int) (height * relaBottom);
-        int w = thermalRight - thermalLeft;
-        int h = thermalBottom - thermalTop;
-
-        int faceArea = w * h;
-        int backgroundArea = (thermalBottom + 1) * width - faceArea;
-        int faceCount = 0;
-        int backgroundCount = 0;
-
-
-        long temperatureTime = System.currentTimeMillis();
-        int ret = mMLX90640.MLX90640_Measure(mlx90640ImageP0, mlx90640ImageP1, mlx90640ToP0, mlx90640ToP1);
-        Logger.i(TAG, "温度检测耗时：" + (System.currentTimeMillis() - temperatureTime));
-//        Logger.i(TAG, "温度图"+Arrays.toString(mTemperature));
-//        float[] max5 = new float[]{0, 0};
-//        float min = 0;
-//        int index = 0;
-        if (ret == 0) {
-            float faceTemperature = 0L;
-            for (int i = 0; i < 768; ++i) {
-                temperatures[i] = mlx90640ToP0[i] + mlx90640ToP1[i];
-                pixels[i] = mlx90640ImageP0[i] + mlx90640ImageP1[i];
-
-
-                if (i <= (thermalBottom + 1) * width) { //脖子以上区域
-                    if ((i > (thermalTop + 1) * width) && ((i - thermalLeft) % width >= 0) && (i - thermalLeft) % width < (thermalRight - thermalLeft)) {    //脸部区域
-//                    mTemperature[i] = 50;
-                        if (faceTemperature < temperatures[i]) {
-                            faceTemperature = temperatures[i];
-                        }
-//                    if (mTemperature[i] > min) {    //求最大的五个温度值
-//                        max5[index] = mTemperature[i];
-//                        min = mTemperature[i];
-//                        for (int j = 0; j < 2; j++) {
-//                            if (min > max5[j]) {
-//                                min = max5[j];
-//                                index = j;
-//                            }
-//                        }
-//                    }
-                        if (temperatures[i] >= 30 && temperatures[i] <= 41) {
-                            faceCount++;
-                        }
-
-                    } else if (temperatures[i] >= 30) {
-                        backgroundCount++;
-                    }
-                }
-
-                if ((i >= thermalTop * width) && (i < (thermalBottom + 1) * width) &&
-                        (((i > thermalTop * width + thermalLeft) && (i <= thermalTop * width + thermalRight)) ||
-                                ((i > thermalBottom * width + thermalLeft) && (i <= thermalBottom * width + thermalRight)) ||
-                                ((i - thermalLeft) % width == 0) || ((i - thermalRight) % width == 0))) {
-                    temperatures[i] = 50;
-                }
-            }
-//        float sum = 0;
-//        for (int j = 0; j < 2; j++) {
-//            sum += max5[j];
-//        }
-//        faceTemperature = sum/2;
-//        System.out.println(Arrays.toString(mTemperature));
-//        System.out.println(Arrays.toString(mImages));
-//        if (ret == 0) {
-//            sendMessage(Constant.THERMAL);
-//            mTvTemperature.setText("当前温度：" + Utils.t1f(max) + "度");
-//            mGridView.setTemperature(mTemperature, mImages);
-//        } else {
-//            mTvTemperature.setText("MLX90640数据读取错误");
-//            Toast.makeText(this, "MLX90640数据读取错误", Toast.LENGTH_LONG).show();
-//        }
-            float f = (float) faceCount / faceArea;
-            float b = (float) backgroundCount / backgroundArea;
-            Logger.i(TAG, "人脸：" + faceArea + "背景：" + backgroundArea + "人脸正常像素：" + faceCount + "比例：" + f + "背景异常像素：" + backgroundCount + "比例：" + b);
-//            boolean isRealFace = (float) faceCount / faceArea > 0.4;
-            boolean isRealFace = faceTemperature > 33 && faceTemperature < 42;
-//            TemperatureInfo temperatureInfo = new TemperatureInfo(temperatures, pixels, faceTemperature, isRealFace);
-
-            Message msg = showHandler.obtainMessage();
-            msg.what = Constant.TEMPERATURE;
-            Bundle data = new Bundle();
-            data.putFloatArray("temperatures", temperatures);
-            data.putFloatArray("pixels", pixels);
-            data.putFloat("faceTemperature", faceTemperature);
-            msg.setData(data);
-            showHandler.sendMessage(msg);
-
-            return isRealFace;
-        } else {
-            Logger.e(TAG, "热成像模块数据读取错误");
-            return false;
-        }
-    }
-
-//    float[] mTemperature = new float[768];
-//    float[] mImages = new float[768];
-//    private Runnable mAutoRefreshRunnable = null;
-//    private void onBtnAuto() {
-//        if (null == mAutoRefreshRunnable) {
-//            if (mlx90640InitializeCheck() < 0) {
-//                return;
-//            }
-//            mAutoRefreshRunnable = new Runnable() {
-//                @Override
-//                public void run() {
-//                    mlx90640Measure();
-//
-//                    mHandler.removeCallbacks(this);
-//                    mHandler.postDelayed(this, 500);
-//                }
-//            };
-//            mHandler.postDelayed(mAutoRefreshRunnable, 1000);
-//        } else {
-//            mHandler.removeCallbacks(mAutoRefreshRunnable);
-//            mAutoRefreshRunnable = null;
-//        }
-//    }
-//    protected void mlx90640Measure() {
-//        int ret = mMLX90640.MLX90640_Measure(mlx90640ImageP0, mlx90640ImageP1, mlx90640ToP0, mlx90640ToP1);
-//
-//        float max = Float.MIN_VALUE;
-//        for (int i = 0; i < 768; ++i) { ;
-//
-//            mTemperature[i] = mlx90640ToP0[i] + mlx90640ToP1[i];
-//            mImages[i] = mlx90640ImageP0[i] + mlx90640ImageP1[i];
-//            if (max < mTemperature[i]) {
-//                max = mTemperature[i];
-//            }
-//        }
-//        System.out.println(Arrays.toString(mTemperature));
-//        System.out.println(Arrays.toString(mImages));
-//        if (ret == 0) {
-//            tvTemperature.setText("当前温度：" + Utils.t1f(max) +"度");
-//            mGridView.setTemperature(mTemperature, mImages);
-//        } else {
-//            tvTemperature.setText("MLX90640数据读取错误");
-//            Toast.makeText(this, "MLX90640数据读取错误", Toast.LENGTH_LONG).show();
-//        }
-//    }
-    /*************************测温结束***************************/
     /**
      * 刷卡
      */
